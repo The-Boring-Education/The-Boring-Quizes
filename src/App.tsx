@@ -5,6 +5,7 @@ import Quiz from "./components/Quiz"
 import Results from "./components/Results"
 import Login from "./components/Login"
 import UserDashboard from "./components/UserDashboard"
+import Onboarding from "./components/Onboarding"
 import { QuizCategory } from "./types/quiz"
 import { useAuth } from "./contexts/AuthContext"
 import { quizApi } from "./services/api"
@@ -93,6 +94,11 @@ function App() {
         return <Login />
     }
 
+    // Show onboarding if user is not onboarded
+    if (!user.isOnboarded) {
+        return <Onboarding onComplete={() => window.location.reload()} />
+    }
+
     // User controls component
     const UserControls = () => (
         <div className='fixed top-4 right-4 flex items-center space-x-4 z-40'>
@@ -128,7 +134,6 @@ function App() {
                 <Quiz
                     key={quizKey}
                     questions={selectedCategory.questions}
-                    categoryId={selectedCategory.id}
                     timePerQuestion={30}
                     onComplete={handleQuizComplete}
                 />

@@ -1,5 +1,4 @@
 import axios from "axios"
-import Cookies from "js-cookie"
 import { config, API_ENDPOINTS } from "../config"
 
 // Create axios instance
@@ -14,7 +13,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
     (config) => {
-        const token = Cookies.get("next-auth.session-token")
+        const token = localStorage.getItem("quizToken")
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
         }
@@ -37,7 +36,33 @@ api.interceptors.response.use(
     }
 )
 
-// Auth APIs
+// User APIs
+export const userApi = {
+    createOrFindUser: (data: {
+        name: string
+        email: string
+        image?: string
+        provider: string
+        providerAccountId: string
+    }) => api.post("/api/v1/user", data),
+
+    getUserByEmail: (email: string) => api.get(`/api/v1/user?email=${email}`),
+
+    onboardUser: (
+        userId: string,
+        data: {
+            userName: string
+            occupation: string
+            purpose: string[]
+            contactNo?: string
+        }
+    ) => api.post(`/api/v1/user/onbording?userId=${userId}`, data),
+
+    checkUsername: (userName: string) =>
+        api.get(`/api/v1/user/onbording?userName=${userName}`)
+}
+
+// Auth APIs (for future use)
 export const authApi = {
     getSession: () => api.get(API_ENDPOINTS.AUTH_SESSION),
     signOut: () => api.post(API_ENDPOINTS.AUTH_SIGNOUT)
@@ -47,21 +72,7 @@ export const authApi = {
 export const quizApi = {
     getCategories: () => api.get(API_ENDPOINTS.QUIZ_CATEGORIES),
     getQuestions: (categoryId: string) =>
-        api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)),
-    submitQuiz: (data: {
-        categoryId: string
-        answers: (number | null)[]
-        timeTaken: number
-    }) => api.post(API_ENDPOINTS.QUIZ_SUBMIT, data),
-    getHistory: (params?: { limit?: number; categoryId?: string }) =>
-        api.get(API_ENDPOINTS.QUIZ_HISTORY, { params })
-}
-
-// Gamification APIs
-export const gamificationApi = {
-    getUserPoints: () => api.get(API_ENDPOINTS.USER_POINTS),
-    getLeaderboard: (limit?: number) =>
-        api.get(API_ENDPOINTS.LEADERBOARD, { params: { limit } })
+        api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
 }
 
 export default api

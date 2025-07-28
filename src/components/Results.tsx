@@ -1,52 +1,21 @@
 import { Question } from "../types/quiz"
-import { quizApi } from "../services/api"
-import { useEffect, useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
 
 interface ResultsProps {
     questions: Question[]
     answers: (number | null)[]
     timeTaken: number
     onRestart: () => void
-    categoryId?: string
 }
 
 export default function Results({
     questions,
     answers,
     timeTaken,
-    onRestart,
-    categoryId
+    onRestart
 }: ResultsProps) {
-    const [submissionData, setSubmissionData] = useState<any>(null)
-    const queryClient = useQueryClient()
-
     const score = answers.reduce((acc: number, answer, index) => {
         return acc + (answer === questions[index].correctAnswer ? 1 : 0)
     }, 0)
-
-    useEffect(() => {
-        // Submit quiz results when component mounts
-        const submitQuiz = async () => {
-            if (categoryId) {
-                try {
-                    const response = await quizApi.submitQuiz({
-                        categoryId,
-                        answers,
-                        timeTaken
-                    })
-                    setSubmissionData(response.data?.data)
-                    // Invalidate queries to refresh user data
-                    queryClient.invalidateQueries(["quiz-history"])
-                    queryClient.invalidateQueries(["user-points"])
-                } catch (error) {
-                    console.error("Failed to submit quiz:", error)
-                }
-            }
-        }
-
-        submitQuiz()
-    }, [categoryId, answers, timeTaken, queryClient])
 
     return (
         <div className='min-h-screen flex flex-col items-center justify-center bg-white text-black p-4'>
@@ -58,11 +27,20 @@ export default function Results({
                     You got <span className='text-red-600'>{score}</span> out of{" "}
                     <span className='text-black'>{questions.length}</span>
                 </div>
+
+                <div className='text-center mb-8'>
+                    <p className='text-gray-600'>
+                        Time taken: {Math.floor(timeTaken / 60)}:
+                        {String(timeTaken % 60).padStart(2, "0")}
+                    </p>
+                </div>
+
                 <button
                     onClick={onRestart}
                     className='block mx-auto mb-12 bg-red-600 hover:bg-black text-white font-bold py-3 px-10 rounded-lg text-lg shadow transition-colors duration-150'>
                     Start Quiz Again
                 </button>
+
                 <div className='space-y-8'>
                     {questions.map((q, idx) => {
                         const isCorrect = answers[idx] === q.correctAnswer
