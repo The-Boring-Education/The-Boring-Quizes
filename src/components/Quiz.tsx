@@ -1,13 +1,10 @@
 import { useState, useEffect, useCallback } from "react"
 import { Question } from "../types/quiz"
-import { quizApi } from "../services/api"
-import { useMutation } from "@tanstack/react-query"
 
 interface QuizProps {
     questions: Question[]
     timePerQuestion: number
     onComplete: (answers: (number | null)[], timeTaken: number) => void
-    categoryId?: string
 }
 
 export default function Quiz({
