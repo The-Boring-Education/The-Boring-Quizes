@@ -44,9 +44,9 @@ export const userApi = {
         image?: string
         provider: string
         providerAccountId: string
-    }) => api.post("/api/v1/user", data),
+    }) => api.post("/user", data),
 
-    getUserByEmail: (email: string) => api.get(`/api/v1/user?email=${email}`),
+    getUserByEmail: (email: string) => api.get(`/user?email=${email}`),
 
     onboardUser: (
         userId: string,
@@ -56,10 +56,10 @@ export const userApi = {
             purpose: string[]
             contactNo?: string
         }
-    ) => api.post(`/api/v1/user/onbording?userId=${userId}`, data),
+    ) => api.post(`/user/onbording?userId=${userId}`, data),
 
     checkUsername: (userName: string) =>
-        api.get(`/api/v1/user/onbording?userName=${userName}`)
+        api.get(`/user/onbording?userName=${userName}`)
 }
 
 // Auth APIs (for future use)

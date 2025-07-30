@@ -14,6 +14,7 @@ import { User, LogOut } from "lucide-react"
 function App() {
     const { user, loading, signOut } = useAuth()
     const [showLanding, setShowLanding] = useState(true)
+    const [showLogin, setShowLogin] = useState(false)
     const [showDashboard, setShowDashboard] = useState(false)
     const [selectedCategory, setSelectedCategory] =
         useState<QuizCategory | null>(null)
@@ -71,13 +72,22 @@ function App() {
 
     const handleGetStarted = () => {
         setShowLanding(false)
+        if (!user) {
+            setShowLogin(true)
+        }
     }
 
     const handleRestart = () => {
         setShowLanding(true)
+        setShowLogin(false)
         setSelectedCategory(null)
         setQuizResults(null)
         setQuizKey((prev) => prev + 1)
+    }
+
+    const handleLoginSuccess = () => {
+        setShowLogin(false)
+        setShowLanding(false)
     }
 
     // Show loading state
@@ -89,14 +99,25 @@ function App() {
         )
     }
 
-    // Show login if not authenticated
-    if (!user) {
-        return <Login />
+    // Show landing page first
+    if (showLanding) {
+        return <Landing onGetStarted={handleGetStarted} />
     }
 
-    // Show onboarding if user is not onboarded
-    if (!user.isOnboarded) {
+    // Show login if not authenticated and login is requested
+    if (!user && showLogin) {
+        return <Login onLoginSuccess={handleLoginSuccess} />
+    }
+
+    // If user exists but not onboarded
+    if (user && !user.isOnboarded) {
         return <Onboarding onComplete={() => window.location.reload()} />
+    }
+
+    // If no user and no login shown, redirect back to landing
+    if (!user && !showLogin) {
+        setShowLanding(true)
+        return null
     }
 
     // User controls component
@@ -106,7 +127,7 @@ function App() {
                 onClick={() => setShowDashboard(true)}
                 className='flex items-center space-x-2 bg-white border-2 border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors'>
                 <User className='w-4 h-4' />
-                <span className='font-medium'>{user.name}</span>
+                <span className='font-medium'>{user?.name}</span>
             </button>
             <button
                 onClick={signOut}
@@ -124,13 +145,11 @@ function App() {
                 <UserDashboard onClose={() => setShowDashboard(false)} />
             )}
 
-            {showLanding && <Landing onGetStarted={handleGetStarted} />}
-
-            {!showLanding && !selectedCategory && (
+            {!selectedCategory && (
                 <CategorySelection onSelectCategory={handleSelectCategory} />
             )}
 
-            {!showLanding && selectedCategory && !quizResults && (
+            {selectedCategory && !quizResults && (
                 <Quiz
                     key={quizKey}
                     questions={selectedCategory.questions}
@@ -139,7 +158,7 @@ function App() {
                 />
             )}
 
-            {!showLanding && selectedCategory && quizResults && (
+            {selectedCategory && quizResults && (
                 <Results
                     questions={selectedCategory.questions}
                     answers={quizResults.answers}
