@@ -1,9 +1,6 @@
 export const config = {
-    API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
-    GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID || "",
-    AUTH_REDIRECT_URL:
-        import.meta.env.VITE_AUTH_REDIRECT_URL ||
-        "http://localhost:3000/api/auth/callback/google"
+    API_BASE_URL: import.meta.env.VITE_TBE_WEBAPP_API_URL,
+    GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID
 }
 
 export const API_ENDPOINTS = {

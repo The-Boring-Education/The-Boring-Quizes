@@ -31,7 +31,7 @@ This app follows the same pattern as other TBE apps (like Prep Yatra):
    Create a `.env` file in the root directory:
 
     ```env
-    VITE_API_BASE_URL=http://localhost:3000
+    VITE_TBE_WEBAPP_API_URL=http://localhost:3000
     VITE_GOOGLE_CLIENT_ID=your-google-client-id
     ```
 
