@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google"
-import { jwtDecode } from "jwt-decode"
 import { userApi } from "../services/api"
 import { config } from "../config"
 
@@ -56,29 +55,31 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     }, [])
 
     const handleGoogleSuccess = async (tokenResponse: {
-        credential?: string
-        access_token?: string
-        id_token?: string
+        access_token: string
     }) => {
         try {
-            // Decode the ID token to get user info
-            const token = tokenResponse.credential || tokenResponse.id_token
-            if (!token) {
-                throw new Error("No token received")
+            // Use access token to fetch user info from Google
+            const response = await fetch(
+                `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenResponse.access_token}`
+            )
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch user info from Google")
             }
-            const decoded = jwtDecode<GoogleUserInfo>(token)
+
+            const googleUserInfo: GoogleUserInfo = await response.json()
 
             // Create or find user in TBE webapp
-            const response = await userApi.createOrFindUser({
-                name: decoded.name,
-                email: decoded.email,
-                image: decoded.picture,
+            const userResponse = await userApi.createOrFindUser({
+                name: googleUserInfo.name,
+                email: googleUserInfo.email,
+                image: googleUserInfo.picture,
                 provider: "google",
-                providerAccountId: decoded.sub
+                providerAccountId: googleUserInfo.sub
             })
 
-            if (response.data?.data) {
-                const userData = response.data.data
+            if (userResponse.data?.data) {
+                const userData = userResponse.data.data
                 const user: User = {
                     id: userData._id,
                     name: userData.name,
@@ -91,23 +92,41 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                 }
                 setUser(user)
                 localStorage.setItem("quizUser", JSON.stringify(user))
-                localStorage.setItem(
-                    "quizToken",
-                    tokenResponse.access_token || tokenResponse.credential || ""
-                )
+                localStorage.setItem("quizToken", tokenResponse.access_token)
             }
         } catch (error) {
             console.error("Google sign in failed:", error)
+            throw error
         }
     }
 
     const googleLogin = useGoogleLogin({
         onSuccess: handleGoogleSuccess,
-        onError: (error) => console.error("Login Failed:", error)
+        onError: (error) => {
+            console.error("Login Failed:", error)
+            throw new Error("Google login failed")
+        }
     })
 
     const signInWithGoogle = () => {
-        googleLogin()
+        return new Promise<void>((resolve, reject) => {
+            googleLogin()
+            // The actual success/error handling is done in the callbacks above
+            // This is a bit of a hack, but useGoogleLogin doesn't return a promise
+            const checkForUser = setInterval(() => {
+                const storedUser = localStorage.getItem("quizUser")
+                if (storedUser) {
+                    clearInterval(checkForUser)
+                    resolve()
+                }
+            }, 100)
+
+            // Timeout after 30 seconds
+            setTimeout(() => {
+                clearInterval(checkForUser)
+                reject(new Error("Login timeout"))
+            }, 30000)
+        })
     }
 
     const signOut = async () => {

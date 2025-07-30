@@ -1,8 +1,21 @@
 import { useAuth } from "../contexts/AuthContext"
 import { Brain } from "lucide-react"
 
-export default function Login() {
+interface LoginProps {
+    onLoginSuccess?: () => void
+}
+
+export default function Login({ onLoginSuccess }: LoginProps) {
     const { signInWithGoogle } = useAuth()
+
+    const handleGoogleSignIn = async () => {
+        try {
+            await signInWithGoogle()
+            onLoginSuccess?.()
+        } catch (error) {
+            console.error("Login failed:", error)
+        }
+    }
 
     return (
         <div className='min-h-screen bg-white flex items-center justify-center p-4'>
@@ -23,7 +36,7 @@ export default function Login() {
                     </h2>
 
                     <button
-                        onClick={signInWithGoogle}
+                        onClick={handleGoogleSignIn}
                         className='w-full flex items-center justify-center space-x-3 bg-white border-2 border-gray-300 rounded-lg px-6 py-3 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200'>
                         <svg className='w-5 h-5' viewBox='0 0 24 24'>
                             <path
