@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import {
     Play,
@@ -15,6 +16,17 @@ import {
 export default function Landing() {
     const navigate = useNavigate()
     const { user } = useAuth()
+
+    // Auto-redirect authenticated users
+    useEffect(() => {
+        if (user) {
+            if (user.isOnboarded) {
+                navigate("/dashboard", { replace: true })
+            } else {
+                navigate("/onboarding", { replace: true })
+            }
+        }
+    }, [user, navigate])
 
     const handleGetStarted = () => {
         if (user) {
