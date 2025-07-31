@@ -1,14 +1,27 @@
+import { useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
 import { Brain } from "lucide-react"
 
 export default function Login() {
-    const { signInWithGoogle } = useAuth()
+    const { signInWithGoogle, user } = useAuth()
+    const navigate = useNavigate()
+
+    // Redirect authenticated users to appropriate page
+    useEffect(() => {
+        if (user) {
+            if (user.isOnboarded) {
+                navigate("/dashboard", { replace: true })
+            } else {
+                navigate("/onboarding", { replace: true })
+            }
+        }
+    }, [user, navigate])
 
     const handleGoogleSignIn = async () => {
         try {
             await signInWithGoogle()
-            // After successful login, the user will be redirected based on their onboarding status
-            // This is handled by the AuthContext and ProtectedRoute components
+            // Navigation will be handled by the useEffect above
         } catch (error) {
             console.error("Login failed:", error)
         }
