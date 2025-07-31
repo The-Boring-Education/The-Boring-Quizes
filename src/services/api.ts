@@ -44,9 +44,10 @@ export const userApi = {
         image?: string
         provider: string
         providerAccountId: string
-    }) => api.post("/user", data),
+    }) => api.post(API_ENDPOINTS.USER_CREATE, data),
 
-    getUserByEmail: (email: string) => api.get(`/user?email=${email}`),
+    getUserByEmail: (email: string) =>
+        api.get(`${API_ENDPOINTS.USER_CREATE}?email=${email}`),
 
     onboardUser: (
         userId: string,
@@ -56,10 +57,10 @@ export const userApi = {
             purpose: string[]
             contactNo?: string
         }
-    ) => api.post(`/user/onbording?userId=${userId}`, data),
+    ) => api.post(`${API_ENDPOINTS.USER_ONBOARDING}?userId=${userId}`, data),
 
     checkUsername: (userName: string) =>
-        api.get(`/user/onbording?userName=${userName}`)
+        api.get(`${API_ENDPOINTS.USER_ONBOARDING}?userName=${userName}`)
 }
 
 // Auth APIs (for future use)
@@ -72,7 +73,15 @@ export const authApi = {
 export const quizApi = {
     getCategories: () => api.get(API_ENDPOINTS.QUIZ_CATEGORIES),
     getQuestions: (categoryId: string) =>
-        api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
+        api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)),
+    submitAttempt: (
+        categoryId: string,
+        data: {
+            userId: string
+            answers: number[]
+            timeTaken: number
+        }
+    ) => api.post(`${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, data)
 }
 
 export default api

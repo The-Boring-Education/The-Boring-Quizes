@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 import {
     Play,
     Brain,
@@ -10,11 +12,22 @@ import {
     Trophy
 } from "lucide-react"
 
-interface LandingProps {
-    onGetStarted: () => void
-}
+export default function Landing() {
+    const navigate = useNavigate()
+    const { user } = useAuth()
 
-export default function Landing({ onGetStarted }: LandingProps) {
+    const handleGetStarted = () => {
+        if (user) {
+            if (user.isOnboarded) {
+                navigate("/dashboard")
+            } else {
+                navigate("/onboarding")
+            }
+        } else {
+            navigate("/login")
+        }
+    }
+
     return (
         <div className='min-h-screen bg-white text-black'>
             {/* Hero Section */}
@@ -51,7 +64,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
                                 your progress.
                             </p>
                             <button
-                                onClick={onGetStarted}
+                                onClick={handleGetStarted}
                                 className='inline-flex items-center px-8 py-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200 text-lg'>
                                 Start Practicing
                                 <ArrowRight className='ml-2 w-5 h-5' />
@@ -259,7 +272,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
                             need to succeed in technical interviews.
                         </p>
                         <button
-                            onClick={onGetStarted}
+                            onClick={handleGetStarted}
                             className='inline-flex items-center px-8 py-4 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200 text-lg'>
                             <Play className='mr-2 w-5 h-5' />
                             Start Your First Quiz

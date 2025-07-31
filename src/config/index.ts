@@ -9,13 +9,17 @@ export const API_ENDPOINTS = {
     AUTH_GOOGLE: "/api/auth/callback/google",
     AUTH_SIGNOUT: "/api/auth/signout",
 
-    // Quiz
-    QUIZ_CATEGORIES: "/quiz/categories",
-    QUIZ_QUESTIONS: (categoryId: string) => `/quiz/${categoryId}/questions`,
-    QUIZ_SUBMIT: "/quiz/submit",
-    QUIZ_HISTORY: "/quiz/history",
+    // Quiz - Updated to match TBE webapp structure
+    QUIZ_CATEGORIES: "/api/v1/quiz",
+    QUIZ_QUESTIONS: (categoryId: string) => `/api/v1/quiz/${categoryId}`,
+    QUIZ_SUBMIT: "/api/v1/quiz/submit",
+    QUIZ_HISTORY: "/api/v1/quiz/history",
+
+    // User
+    USER_CREATE: "/api/v1/user",
+    USER_ONBOARDING: "/api/v1/user/onbording",
 
     // Gamification
-    USER_POINTS: "/gamification/points",
-    LEADERBOARD: "/gamification/leaderboard"
+    USER_POINTS: "/api/v1/gamification/points",
+    LEADERBOARD: "/api/v1/gamification/leaderboard"
 }

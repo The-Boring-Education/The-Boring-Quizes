@@ -2,32 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react"
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google"
 import { userApi } from "../services/api"
 import { config } from "../config"
-
-interface User {
-    id: string
-    name: string
-    email: string
-    image?: string
-    isOnboarded?: boolean
-    userName?: string
-    occupation?: string
-    purpose?: string[]
-}
-
-interface GoogleUserInfo {
-    sub: string
-    name: string
-    email: string
-    picture: string
-}
-
-interface AuthContextType {
-    user: User | null
-    loading: boolean
-    signInWithGoogle: () => void
-    signOut: () => Promise<void>
-    updateUser: (updates: Partial<User>) => void
-}
+import { User, GoogleUserInfo, AuthContextType } from "../types/auth"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -133,7 +108,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         setUser(null)
         localStorage.removeItem("quizUser")
         localStorage.removeItem("quizToken")
-        window.location.href = "/"
+        // Don't redirect here, let the ProtectedRoute handle it
     }
 
     const updateUser = (updates: Partial<User>) => {
