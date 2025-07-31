@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { userApi } from "../../services/api"
 import StepUsername from "./StepUsername"
@@ -6,12 +7,9 @@ import StepOccupation from "./StepOccupation"
 import StepPurpose from "./StepPurpose"
 import { Brain, ArrowLeft, ArrowRight } from "lucide-react"
 
-interface OnboardingProps {
-    onComplete: () => void
-}
-
-export default function Onboarding({ onComplete }: OnboardingProps) {
+export default function Onboarding() {
     const { user, updateUser } = useAuth()
+    const navigate = useNavigate()
     const [currentStep, setCurrentStep] = useState(0)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState("")
@@ -84,7 +82,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
             if (response.data?.data) {
                 updateUser({ isOnboarded: true, ...form })
-                onComplete()
+                navigate("/dashboard")
             }
         } catch (error) {
             setError("Failed to complete onboarding. Please try again.")

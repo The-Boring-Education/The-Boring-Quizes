@@ -1,17 +1,14 @@
 import { useAuth } from "../contexts/AuthContext"
 import { Brain } from "lucide-react"
 
-interface LoginProps {
-    onLoginSuccess?: () => void
-}
-
-export default function Login({ onLoginSuccess }: LoginProps) {
+export default function Login() {
     const { signInWithGoogle } = useAuth()
 
     const handleGoogleSignIn = async () => {
         try {
             await signInWithGoogle()
-            onLoginSuccess?.()
+            // After successful login, the user will be redirected based on their onboarding status
+            // This is handled by the AuthContext and ProtectedRoute components
         } catch (error) {
             console.error("Login failed:", error)
         }

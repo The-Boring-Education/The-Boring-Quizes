@@ -9,6 +9,8 @@ A quiz application built with React, TypeScript, and Vite that integrates with T
 -   **Quiz Categories**: Dynamic loading of quiz categories from TBE webapp
 -   **Interactive Quizzes**: Timed questions with instant feedback
 -   **User Profile**: View and manage user information
+-   **Proper Routing**: Clean URL structure with React Router
+-   **TBE Webapp Integration**: Full integration with TBE webapp APIs
 
 ## Architecture
 
@@ -18,6 +20,7 @@ This app follows the same pattern as other TBE apps (like Prep Yatra):
 -   Communicates with TBE webapp APIs for user management
 -   Has its own onboarding flow
 -   Stores user data locally while syncing with TBE backend
+-   Uses React Router for proper page navigation
 
 ## Setup
 
@@ -45,32 +48,47 @@ This app follows the same pattern as other TBE apps (like Prep Yatra):
 Make sure the TBE webapp is running and has the following:
 
 1. CORS configured to allow requests from `http://localhost:5173`
-2. The quiz API endpoints available at `/quiz/*`
-3. User management endpoints at `/user/*`
+2. The quiz API endpoints available at `/api/v1/quiz/*`
+3. User management endpoints at `/api/v1/user/*`
 
 ## User Flow
 
-1. User lands on the app and sees the landing page
-2. Clicking "Get Started" prompts for Google sign-in
-3. After authentication, new users go through onboarding:
+1. User lands on the app and sees the landing page (`/`)
+2. Clicking "Get Started" prompts for Google sign-in (`/login`)
+3. After authentication, new users go through onboarding (`/onboarding`):
     - Choose username
     - Select occupation
     - Select purposes for using the app
-4. Once onboarded, users can:
+4. Once onboarded, users can access the dashboard (`/dashboard`):
     - Select quiz categories
-    - Take timed quizzes
-    - View results with explanations
-    - Access their profile
+    - View user profile and stats
+5. Taking quizzes (`/quiz/:categoryId`):
+    - Timed questions with progress tracking
+    - Real-time feedback
+6. Viewing results (`/results/:categoryId`):
+    - Detailed score breakdown
+    - Question-by-question review
+    - Submit results to TBE webapp
 
 ## API Integration
 
 The app integrates with TBE webapp through these endpoints:
 
--   `POST /user` - Create/find user after Google auth
--   `GET /user/onbording?userName={username}` - Check username availability
--   `POST /user/onbording?userId={userId}` - Complete user onboarding
--   `GET /quiz/categories` - Get available quiz categories
--   `GET /quiz/{categoryId}/questions` - Get questions for a category
+-   `POST /api/v1/user` - Create/find user after Google auth
+-   `GET /api/v1/user/onbording?userName={username}` - Check username availability
+-   `POST /api/v1/user/onbording?userId={userId}` - Complete user onboarding
+-   `GET /api/v1/quiz` - Get available quiz categories
+-   `GET /api/v1/quiz/{categoryId}` - Get questions for a category
+-   `POST /api/v1/quiz/{categoryId}/attempt` - Submit quiz attempt
+
+## Routing Structure
+
+-   `/` - Landing page
+-   `/login` - Google OAuth login
+-   `/onboarding` - User onboarding flow (protected)
+-   `/dashboard` - Main dashboard with quiz categories (protected)
+-   `/quiz/:categoryId` - Take a quiz (protected)
+-   `/results/:categoryId` - View quiz results (protected)
 
 ## Development
 
@@ -78,3 +96,15 @@ The app integrates with TBE webapp through these endpoints:
 -   Uses React 18 with TypeScript
 -   Styled with Tailwind CSS
 -   Icons from Lucide React
+-   React Router for navigation
+-   TanStack Query for data fetching
+-   Google OAuth for authentication
+
+## Key Improvements
+
+1. **Proper Routing**: Each page has its own route instead of all being on `/`
+2. **TBE Webapp Integration**: Full integration with TBE webapp APIs
+3. **Protected Routes**: Authentication and onboarding checks
+4. **Better UX**: Clean navigation and user flow
+5. **API Integration**: Real-time data from TBE webapp
+6. **Type Safety**: Proper TypeScript interfaces for all API calls
