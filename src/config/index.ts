@@ -6,20 +6,19 @@ export const config = {
 export const API_ENDPOINTS = {
     // Auth
     AUTH_SESSION: "/api/auth/session",
-    AUTH_GOOGLE: "/api/auth/callback/google",
     AUTH_SIGNOUT: "/api/auth/signout",
 
     // Quiz - Updated to match TBE webapp structure
-    QUIZ_CATEGORIES: "/api/v1/quiz",
-    QUIZ_QUESTIONS: (categoryId: string) => `/api/v1/quiz/${categoryId}`,
-    QUIZ_SUBMIT: "/api/v1/quiz/submit",
-    QUIZ_HISTORY: "/api/v1/quiz/history",
+    QUIZ_CATEGORIES: "/quiz",
+    QUIZ_QUESTIONS: (categoryId: string) => `/quiz/${categoryId}`,
+    QUIZ_SUBMIT: "/quiz/submit",
+    QUIZ_HISTORY: "/quiz/history",
 
     // User
-    USER_CREATE: "/api/v1/user",
-    USER_ONBOARDING: "/api/v1/user/onbording",
+    USER_CREATE: "/user",
+    USER_ONBOARDING: "/user/onbording",
 
     // Gamification
-    USER_POINTS: "/api/v1/gamification/points",
-    LEADERBOARD: "/api/v1/gamification/leaderboard"
+    USER_POINTS: "/gamification/points",
+    LEADERBOARD: "/gamification/leaderboard"
 }
