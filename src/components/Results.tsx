@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext"
 import { quizApi } from "../services/api"
 import { Question } from "../types/quiz"
 import { ArrowLeft, Trophy, Clock, Target } from "lucide-react"
+import MarkdownRenderer from "./common/MarkdownRenderer"
 
 interface LocationState {
     answers: (number | null)[]
@@ -232,9 +233,12 @@ export default function Results() {
                                         </span>
                                     </div>
 
-                                    <p className='text-gray-900 mb-4'>
-                                        {question.question}
-                                    </p>
+                                    <div className='mb-4'>
+                                        <MarkdownRenderer
+                                            content={question.question}
+                                            className='text-gray-900'
+                                        />
+                                    </div>
 
                                     <div className='space-y-2 mb-4'>
                                         {question.options.map(
@@ -251,13 +255,20 @@ export default function Results() {
                                                             ? "border-red-500 bg-red-100"
                                                             : "border-gray-200 bg-white"
                                                     }`}>
-                                                    <span className='font-semibold mr-2'>
-                                                        {String.fromCharCode(
-                                                            65 + optionIndex
-                                                        )}
-                                                        .
-                                                    </span>
-                                                    {option}
+                                                    <div className='flex items-start'>
+                                                        <span className='font-semibold mr-2 mt-1 flex-shrink-0'>
+                                                            {String.fromCharCode(
+                                                                65 + optionIndex
+                                                            )}
+                                                            .
+                                                        </span>
+                                                        <div className='flex-1'>
+                                                            <MarkdownRenderer
+                                                                content={option}
+                                                                className='text-left'
+                                                            />
+                                                        </div>
+                                                    </div>
                                                     {optionIndex ===
                                                         question.correctAnswer && (
                                                         <span className='ml-2 text-green-700 font-semibold'>
@@ -280,9 +291,10 @@ export default function Results() {
                                         <h4 className='font-semibold text-gray-900 mb-2'>
                                             Explanation:
                                         </h4>
-                                        <p className='text-gray-700'>
-                                            {question.explanation}
-                                        </p>
+                                        <MarkdownRenderer
+                                            content={question.explanation}
+                                            className='text-gray-700'
+                                        />
                                     </div>
                                 </div>
                             )

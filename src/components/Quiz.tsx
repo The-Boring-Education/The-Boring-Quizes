@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { quizApi } from "../services/api"
 import { Question } from "../types/quiz"
 import { ArrowLeft, Clock } from "lucide-react"
+import MarkdownRenderer from "./common/MarkdownRenderer"
 
 interface QuizQuestion {
     _id?: string
@@ -180,9 +181,10 @@ export default function Quiz() {
                 <div className='bg-white rounded-lg shadow-lg p-8'>
                     {/* Question */}
                     <div className='mb-8'>
-                        <h2 className='text-2xl font-bold text-gray-900 mb-4'>
-                            {currentQ.question}
-                        </h2>
+                        <MarkdownRenderer
+                            content={currentQ.question}
+                            className='text-2xl font-bold text-gray-900 mb-4'
+                        />
                     </div>
 
                     {/* Options */}
@@ -196,10 +198,17 @@ export default function Quiz() {
                                         ? "border-red-600 bg-red-50 text-red-600"
                                         : "border-gray-300 hover:border-gray-400 text-gray-900"
                                 }`}>
-                                <span className='font-semibold text-red-600 mr-3'>
-                                    {String.fromCharCode(65 + index)}.
-                                </span>
-                                {option}
+                                <div className='flex items-start'>
+                                    <span className='font-semibold text-red-600 mr-3 mt-1 flex-shrink-0'>
+                                        {String.fromCharCode(65 + index)}.
+                                    </span>
+                                    <div className='flex-1'>
+                                        <MarkdownRenderer
+                                            content={option}
+                                            className='text-left'
+                                        />
+                                    </div>
+                                </div>
                             </button>
                         ))}
                     </div>

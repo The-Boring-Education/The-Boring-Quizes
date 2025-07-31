@@ -8,6 +8,7 @@ A quiz application built with React, TypeScript, and Vite that integrates with T
 -   **User Onboarding**: Custom onboarding flow to collect user preferences
 -   **Quiz Categories**: Dynamic loading of quiz categories from TBE webapp
 -   **Interactive Quizzes**: Timed questions with instant feedback
+-   **MDX Support**: Rich text rendering with code syntax highlighting for questions and answers
 -   **User Profile**: View and manage user information
 -   **Proper Routing**: Clean URL structure with React Router
 -   **TBE Webapp Integration**: Full integration with TBE webapp APIs
@@ -99,6 +100,41 @@ The app integrates with TBE webapp through these endpoints:
 -   React Router for navigation
 -   TanStack Query for data fetching
 -   Google OAuth for authentication
+-   React Markdown with syntax highlighting for rich content
+
+## MDX Support
+
+The app now supports rich content rendering for quiz questions and answers:
+
+### Features
+
+-   **Code Syntax Highlighting**: Questions can include code snippets with proper syntax highlighting
+-   **Markdown Formatting**: Support for **bold**, _italic_, `inline code`, lists, and more
+-   **Code Blocks**: Multi-line code examples with language-specific highlighting
+-   **Responsive Design**: Code blocks and content adapt to different screen sizes
+
+### Example Question Format
+
+````markdown
+Given the following React component:
+
+```jsx
+const Component = () => {
+    const [count, setCount] = useState(0)
+    return <div>{count}</div>
+}
+```
+````
+
+What will happen when this component renders?
+
+### Supported Languages
+
+-   JavaScript/JSX
+-   TypeScript/TSX
+-   HTML/CSS
+-   JSON
+-   And many more via Prism.js
 
 ## Key Improvements
 
@@ -108,3 +144,4 @@ The app integrates with TBE webapp through these endpoints:
 4. **Better UX**: Clean navigation and user flow
 5. **API Integration**: Real-time data from TBE webapp
 6. **Type Safety**: Proper TypeScript interfaces for all API calls
+7. **MDX Support**: Rich content rendering with syntax highlighting
