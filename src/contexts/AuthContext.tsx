@@ -119,12 +119,36 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         }
     }
 
+    const refreshUserFromBackend = async () => {
+        try {
+          const response = await userApi.getUserByEmail(user?.email || "");
+          const data = response.data.data;
+      
+          const updatedUser: User = {
+            id: data._id,
+            name: data.name,
+            email: data.email,
+            image: data.image,
+            isOnboarded: data.isOnboarded || false,
+            userName: data.userName,
+            occupation: data.occupation,
+            purpose: data.purpose,
+          };
+            
+          setUser(updatedUser);
+          localStorage.setItem("quizUser", JSON.stringify(updatedUser));
+        } catch (error) {
+        }
+      };
+      
+
     const value = {
         user,
         loading,
         signInWithGoogle,
         signOut,
-        updateUser
+        updateUser,
+        refreshUserFromBackend
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
