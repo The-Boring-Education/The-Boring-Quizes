@@ -39,7 +39,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
 
       if (user.isOnboarded && location.pathname === "/onboarding") {
-        console.log("Already onboarded, redirecting to dashboard...");
         navigate("/dashboard", { replace: true });
         return;
       }
@@ -70,12 +69,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  // 👇 Block rendering until refreshed, if came from onboarding
   if (cameFromOnboarding && !hasRefreshed) {
     return null;
   }
 
-  // 👇 Still not onboarded, redirect will already be handled above
   if (!user.isOnboarded && location.pathname !== "/onboarding") {
     return null;
   }
