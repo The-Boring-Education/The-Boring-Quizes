@@ -12,14 +12,13 @@ export default function Login() {
             if (user.isOnboarded) {
                 navigate("/dashboard", { replace: true });
             } else {
-                const onboardingBaseUrl = "http://localhost:5174"; // Change as needed
                 const params = new URLSearchParams({
                     userId: user.id,
                     from: "quizapp",
                     redirect: window.location.origin + "/dashboard?onboardingComplete=true",
                 });
     
-                window.location.href = `${onboardingBaseUrl}/?${params.toString()}`;
+                window.location.href = `${import.meta.env.VITE_ONBAORDING_APP_URL}/?${params.toString()}`;
             }
         }
     }, [user, navigate]);
