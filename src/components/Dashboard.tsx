@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
@@ -21,6 +21,30 @@ export default function Dashboard() {
         queryFn: () => quizApi.getCategories()
     })
 
+    const {
+        data: attemptsData,
+        refetch: refetchAttempts
+    } = useQuery({
+        queryKey: ["quiz-attempts"],
+        queryFn: () => quizApi.getUserAttempts(user?.id || "")
+    })
+
+    const attempts = attemptsData?.data?.data || []
+
+    const totalQuizzes = attempts.length
+    const totalTimeSpentSeconds = attempts.reduce((sum: number, a: any) => sum + (a.timeTaken || 0), 0)
+    const totalTimeSpentMinutes = Math.floor(totalTimeSpentSeconds / 60)   
+    const averageScore =
+  attempts.length > 0
+    ? Math.round(
+        attempts.reduce((sum:number, a:any) => sum + (a.score || 0), 0) / attempts.length
+      )
+    : 0;
+
+    useEffect(()=>{
+  refetchAttempts();
+    },[])   
+     
     const categories = categoriesData?.data?.data || []
 
     const handleSelectCategory = (category: QuizCategory) => {
@@ -114,10 +138,10 @@ export default function Dashboard() {
                             </div>
                             <div className='ml-4'>
                                 <p className='text-sm font-medium text-gray-600'>
-                                    Total Quizzes
+                                    Total Quiz Attempts
                                 </p>
                                 <p className='text-2xl font-bold text-gray-900'>
-                                    0
+                                    {totalQuizzes}
                                 </p>
                             </div>
                         </div>
@@ -133,7 +157,7 @@ export default function Dashboard() {
                                     Average Score
                                 </p>
                                 <p className='text-2xl font-bold text-gray-900'>
-                                    0%
+                                {averageScore}%
                                 </p>
                             </div>
                         </div>
@@ -149,7 +173,22 @@ export default function Dashboard() {
                                     Time Spent
                                 </p>
                                 <p className='text-2xl font-bold text-gray-900'>
-                                    0m
+                                    {totalTimeSpentMinutes}m
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='bg-white rounded-lg shadow p-6 border border-gray-200'>
+                        <div className='flex items-center'>
+                            <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
+                                <Clock className='w-6 h-6 text-purple-600' />
+                            </div>
+                            <div className='ml-4'>
+                                <p className='text-sm font-medium text-gray-600'>
+                                    Time Spent
+                                </p>
+                                <p className='text-2xl font-bold text-gray-900'>
+                                    {totalTimeSpentSeconds}sec
                                 </p>
                             </div>
                         </div>

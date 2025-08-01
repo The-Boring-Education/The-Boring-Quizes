@@ -7,16 +7,23 @@ export default function Login() {
     const { signInWithGoogle, user } = useAuth()
     const navigate = useNavigate()
 
-    // Redirect authenticated users to appropriate page
     useEffect(() => {
         if (user) {
             if (user.isOnboarded) {
-                navigate("/dashboard", { replace: true })
+                navigate("/dashboard", { replace: true });
             } else {
-                navigate("/onboarding", { replace: true })
+                const onboardingBaseUrl = "http://localhost:5174"; // Change as needed
+                const params = new URLSearchParams({
+                    userId: user.id,
+                    from: "quizapp",
+                    redirect: window.location.origin + "/dashboard?onboardingComplete=true",
+                });
+    
+                window.location.href = `${onboardingBaseUrl}/?${params.toString()}`;
             }
         }
-    }, [user, navigate])
+    }, [user, navigate]);
+    
 
     const handleGoogleSignIn = async () => {
         try {
