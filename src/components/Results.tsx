@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+import { useRef } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
@@ -27,7 +28,6 @@ export default function Results() {
     const navigate = useNavigate()
     const location = useLocation()
     const { user } = useAuth()
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { answers, timeTaken } = (location.state as LocationState) || {
         answers: [],
@@ -67,21 +67,24 @@ export default function Results() {
         totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0
 
     // Submit results to TBE webapp API
+
+    const hasSubmittedRef = useRef(false)
+    
     useEffect(() => {
         const submitResults = async () => {
             if (
+                hasSubmittedRef.current ||
                 !user?.id ||
-                isSubmitting ||
                 !categoryId ||
                 answers.length === 0
             )
                 return
-
-            setIsSubmitting(true)
+    
+            hasSubmittedRef.current = true
+    
             try {
-                // Convert answers to the format expected by the API
-                const answersArray = answers.map((answer) => answer ?? -1) // -1 for unanswered questions
-
+                const answersArray = answers.map((answer) => answer ?? -1)
+    
                 await quizApi.submitAttempt(categoryId, {
                     userId: user.id,
                     answers: answersArray,
@@ -89,13 +92,13 @@ export default function Results() {
                 })
             } catch (error) {
                 console.error("Failed to submit results:", error)
-            } finally {
-                setIsSubmitting(false)
+                hasSubmittedRef.current = false // allow retry if needed
             }
         }
-
+    
         submitResults()
-    }, [user?.id, categoryId, answers, timeTaken, isSubmitting])
+    }, [user?.id, categoryId, answers, timeTaken])
+    
 
     if (isLoading) {
         return (

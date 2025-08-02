@@ -7,7 +7,6 @@ import {
 import { useAuth } from "./contexts/AuthContext"
 import Landing from "./components/Landing"
 import Login from "./components/Login"
-import Onboarding from "./components/Onboarding"
 import Dashboard from "./components/Dashboard"
 import Quiz from "./components/Quiz"
 import Results from "./components/Results"
@@ -32,14 +31,6 @@ function App() {
                 <Route path='/login' element={<Login />} />
 
                 {/* Protected routes */}
-                <Route
-                    path='/onboarding'
-                    element={
-                        <ProtectedRoute>
-                            <Onboarding />
-                        </ProtectedRoute>
-                    }
-                />
                 <Route
                     path='/dashboard'
                     element={
