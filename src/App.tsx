@@ -1,70 +1,65 @@
-import { useState } from "react"
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom"
+import { useAuth } from "./contexts/AuthContext"
 import Landing from "./components/Landing"
-import CategorySelection from "./components/CategorySelection"
+import Login from "./components/Login"
+import Dashboard from "./components/Dashboard"
 import Quiz from "./components/Quiz"
 import Results from "./components/Results"
-import { QuizCategory } from "./types/quiz"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 function App() {
-    const [showLanding, setShowLanding] = useState(true)
-    const [selectedCategory, setSelectedCategory] =
-        useState<QuizCategory | null>(null)
-    const [quizResults, setQuizResults] = useState<{
-        answers: (number | null)[]
-        timeTaken: number
-    } | null>(null)
-    const [quizKey, setQuizKey] = useState(0) // for resetting quiz
+    const { loading } = useAuth()
 
-    const handleSelectCategory = (category: QuizCategory) => {
-        setSelectedCategory(category)
-        setQuizResults(null)
-        setQuizKey((prev) => prev + 1)
-    }
-
-    const handleQuizComplete = (
-        answers: (number | null)[],
-        timeTaken: number
-    ) => {
-        setQuizResults({ answers, timeTaken })
-    }
-
-    const handleGetStarted = () => {
-        setShowLanding(false)
-    }
-
-    const handleRestart = () => {
-        setShowLanding(true)
-        setSelectedCategory(null)
-        setQuizResults(null)
-        setQuizKey((prev) => prev + 1)
-    }
-
-    if (showLanding) {
-        return <Landing onGetStarted={handleGetStarted} />
-    }
-
-    if (!selectedCategory) {
-        return <CategorySelection onSelectCategory={handleSelectCategory} />
-    }
-
-    if (!quizResults) {
+    if (loading) {
         return (
-            <Quiz
-                key={quizKey}
-                questions={selectedCategory.questions}
-                timePerQuestion={30}
-                onComplete={handleQuizComplete}
-            />
+            <div className='min-h-screen flex items-center justify-center'>
+                <div className='text-2xl font-semibold'>Loading...</div>
+            </div>
         )
     }
 
     return (
-        <Results
-            questions={selectedCategory.questions}
-            answers={quizResults.answers}
-            timeTaken={quizResults.timeTaken}
-            onRestart={handleRestart}
-        />
+        <Router>
+            <Routes>
+                {/* Public routes */}
+                <Route path='/' element={<Landing />} />
+                <Route path='/login' element={<Login />} />
+
+                {/* Protected routes */}
+                <Route
+                    path='/dashboard'
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path='/quiz/:categoryId'
+                    element={
+                        <ProtectedRoute>
+                            <Quiz />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path='/results/:categoryId'
+                    element={
+                        <ProtectedRoute>
+                            <Results />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Redirect to landing if no route matches */}
+                <Route path='*' element={<Navigate to='/' replace />} />
+            </Routes>
+        </Router>
     )
 }
 

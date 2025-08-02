@@ -1,4 +1,5 @@
 import { Question as QuestionType } from "../types/quiz"
+import MarkdownRenderer from "./common/MarkdownRenderer"
 
 interface QuestionProps {
     question: QuestionType
@@ -35,8 +36,11 @@ export default function Question({
             <div className='mb-6 text-sm font-bold text-black text-center'>
                 {/* No question number or category, keep minimal */}
             </div>
-            <div className='mb-8 text-2xl font-bold text-center text-black'>
-                {question.question}
+            <div className='mb-8'>
+                <MarkdownRenderer
+                    content={question.question}
+                    className='text-xl font-bold text-center text-black'
+                />
             </div>
             <div className='space-y-4 mb-8'>
                 {question.options.map((option, index) => (
@@ -45,10 +49,17 @@ export default function Question({
                         onClick={() => !showResult && onAnswerSelect(index)}
                         className={getOptionClass(index)}
                         disabled={showResult}>
-                        <span className='font-bold text-red-600 mr-2'>
-                            {String.fromCharCode(65 + index)}.
-                        </span>{" "}
-                        {option}
+                        <div className='flex items-start'>
+                            <span className='font-bold text-red-600 mr-3 mt-1 flex-shrink-0'>
+                                {String.fromCharCode(65 + index)}.
+                            </span>
+                            <div className='flex-1'>
+                                <MarkdownRenderer
+                                    content={option}
+                                    className='text-left'
+                                />
+                            </div>
+                        </div>
                     </button>
                 ))}
             </div>
