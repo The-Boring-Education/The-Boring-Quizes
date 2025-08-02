@@ -1,7 +1,7 @@
 export const config = {
     API_BASE_URL: import.meta.env.VITE_TBE_WEBAPP_API_URL,
     GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    ONBOARDING_APP_URL: import.meta.env.VITE_ONBAORDING_APP_URL
+    ONBOARDING_APP_URL: import.meta.env.VITE_ONBOARDING_APP_URL
 }
 
 export const API_ENDPOINTS = {
