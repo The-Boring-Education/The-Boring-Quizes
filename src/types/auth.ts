@@ -22,4 +22,5 @@ export interface AuthContextType {
     signInWithGoogle: () => void
     signOut: () => Promise<void>
     updateUser: (updates: Partial<User>) => void
+    refreshUserFromBackend: () => Promise<void>;    
 }

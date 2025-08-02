@@ -75,13 +75,15 @@ export const quizApi = {
     getQuestions: (categoryId: string) =>
         api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)),
     submitAttempt: (
-        categoryId: string,
+        categoryId: string, 
         data: {
             userId: string
             answers: number[]
             timeTaken: number
         }
-    ) => api.post(`${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, data)
+    ) => api.post(`${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, data),
+    getUserAttempts: async (userId: string) =>
+        api.get(`${API_ENDPOINTS.QUIZ_ATTEMPTS}?userId=${userId}`)
 }
 
 export default api
