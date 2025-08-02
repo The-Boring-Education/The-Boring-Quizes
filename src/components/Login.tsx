@@ -10,19 +10,22 @@ export default function Login() {
     useEffect(() => {
         if (user) {
             if (user.isOnboarded) {
-                navigate("/dashboard", { replace: true });
+                navigate("/dashboard", { replace: true })
             } else {
                 const params = new URLSearchParams({
                     userId: user.id,
                     from: "quizapp",
-                    redirect: window.location.origin + "/dashboard?onboardingComplete=true",
-                });
-    
-                window.location.href = `${import.meta.env.VITE_ONBAORDING_APP_URL}/?${params.toString()}`;
+                    redirect:
+                        window.location.origin +
+                        "/dashboard?onboardingComplete=true"
+                })
+
+                window.location.href = `${
+                    import.meta.env.VITE_ONBOARDING_APP_URL
+                }/?${params.toString()}`
             }
         }
-    }, [user, navigate]);
-    
+    }, [user, navigate])
 
     const handleGoogleSignIn = async () => {
         try {
