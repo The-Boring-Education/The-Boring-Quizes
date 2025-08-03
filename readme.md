@@ -76,8 +76,8 @@ Make sure the TBE webapp is running and has the following:
 The app integrates with TBE webapp through these endpoints:
 
 -   `POST /user` - Create/find user after Google auth
--   `GET /user/onbording?userName={username}` - Check username availability
--   `POST /user/onbording?userId={userId}` - Complete user onboarding
+-   `GET /user/onboarding?userName={username}` - Check username availability
+-   `POST /user/onboarding?userId={userId}` - Complete user onboarding
 -   `GET /quiz` - Get available quiz categories
 -   `GET /quiz/{categoryId}` - Get questions for a category
 -   `POST /quiz/{categoryId}/attempt` - Submit quiz attempt

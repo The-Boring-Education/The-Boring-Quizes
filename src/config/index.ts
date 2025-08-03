@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
 
     // User
     USER_CREATE: "/user",
-    USER_ONBOARDING: "/user/onbording",
+    USER_ONBOARDING: "/user/onboarding",
 
     // Gamification
     USER_POINTS: "/gamification/points",
