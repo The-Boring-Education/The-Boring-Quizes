@@ -1,13 +1,12 @@
 {
   "name": "the-boring-quizes",
-  "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
@@ -17,28 +16,23 @@
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.344.0",
+    "next": "13.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.7.1",
     "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
     "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
-    "eslint": "^9.9.1",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
-    "globals": "^15.9.0",
+    "eslint": "^8",
+    "eslint-config-next": "13.5.6",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "typescript": "^5.5.3"
   }
 }

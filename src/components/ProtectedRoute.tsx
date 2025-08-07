@@ -1,21 +1,22 @@
+'use client'
+
 import { ReactNode, useEffect, useState } from "react"
-import { Navigate, useLocation, useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/AuthContext"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface ProtectedRouteProps {
     children: ReactNode
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { user, loading, refreshUserFromBackend } = useAuth()
-    const location = useLocation()
-    const navigate = useNavigate()
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
     const [hasRefreshed, setHasRefreshed] = useState(false)
     const [refreshingUser, setRefreshingUser] = useState(false)
 
-    const params = new URLSearchParams(location.search)
-    const cameFromOnboarding = params.get("onboardingComplete") === "true"
+    const cameFromOnboarding = searchParams.get("onboardingComplete") === "true"
 
     // 👇 Handle onboarding redirection and refresh logic
     useEffect(() => {
@@ -38,12 +39,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
                 return
             }
 
-            if (user.isOnboarded && location.pathname === "/onboarding") {
-                navigate("/dashboard", { replace: true })
+            if (user.isOnboarded && window.location.pathname === "/onboarding") {
+                router.push("/dashboard")
                 return
             }
 
-            if (!user.isOnboarded && location.pathname !== "/onboarding") {
+            if (!user.isOnboarded && window.location.pathname !== "/onboarding") {
                 const redirectParams = new URLSearchParams({
                     userId: user.id,
                     from: "quizapp",
@@ -51,7 +52,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
                 })
 
                 const onboardingURL = `${
-                    import.meta.env.VITE_ONBOARDING_APP_URL
+                    process.env.NEXT_PUBLIC_ONBOARDING_APP_URL
                 }/?${redirectParams.toString()}`
                 window.location.href = onboardingURL
                 return
@@ -60,10 +61,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }, [
         user,
         loading,
-        location.pathname,
         hasRefreshed,
         cameFromOnboarding,
-        navigate
+        router,
+        refreshUserFromBackend
     ])
 
     if (loading || refreshingUser) {
@@ -75,14 +76,15 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     if (!user) {
-        return <Navigate to='/login' replace />
+        router.push('/login')
+        return null
     }
 
     if (cameFromOnboarding && !hasRefreshed) {
         return null
     }
 
-    if (!user.isOnboarded && location.pathname !== "/onboarding") {
+    if (!user.isOnboarded && window.location.pathname !== "/onboarding") {
         return null
     }
 
