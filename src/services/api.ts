@@ -1,5 +1,5 @@
 import axios from "axios"
-import { config, API_ENDPOINTS } from "../config"
+import { config, API_ENDPOINTS } from "@/config"
 
 // Create axios instance
 const api = axios.create({
@@ -13,9 +13,11 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("quizToken")
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem("quizToken")
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`
+            }
         }
         return config
     },
@@ -30,7 +32,9 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             // Handle unauthorized - redirect to login
-            window.location.href = "/"
+            if (typeof window !== 'undefined') {
+                window.location.href = "/"
+            }
         }
         return Promise.reject(error)
     }

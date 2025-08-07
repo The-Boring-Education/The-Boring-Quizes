@@ -1,6 +1,8 @@
-import { useNavigate } from "react-router-dom"
+'use client'
+
 import { useEffect } from "react"
-import { useAuth } from "../contexts/AuthContext"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
 import {
     Play,
     Brain,
@@ -14,29 +16,29 @@ import {
 } from "lucide-react"
 
 export default function Landing() {
-    const navigate = useNavigate()
+    const router = useRouter()
     const { user } = useAuth()
 
     // Auto-redirect authenticated users
     useEffect(() => {
         if (user) {
             if (user.isOnboarded) {
-                navigate("/dashboard", { replace: true })
+                router.push("/dashboard")
             } else {
-                navigate("/onboarding", { replace: true })
+                router.push("/onboarding")
             }
         }
-    }, [user, navigate])
+    }, [user, router])
 
     const handleGetStarted = () => {
         if (user) {
             if (user.isOnboarded) {
-                navigate("/dashboard")
+                router.push("/dashboard")
             } else {
-                navigate("/onboarding")
+                router.push("/onboarding")
             }
         } else {
-            navigate("/login")
+            router.push("/login")
         }
     }
 
@@ -154,7 +156,7 @@ export default function Landing() {
                                     Detailed Explanations
                                 </h4>
                                 <p className='text-gray-600 leading-relaxed'>
-                                    Understand the 'why' behind every answer
+                                    Understand the &apos;why&apos; behind every answer
                                     with comprehensive explanations.
                                 </p>
                             </div>

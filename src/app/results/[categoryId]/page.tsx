@@ -1,17 +1,14 @@
-import { useEffect } from "react"
-import { useRef } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
-import { useAuth } from "../contexts/AuthContext"
-import { quizApi } from "../services/api"
-import { Question } from "../types/quiz"
-import { ArrowLeft, Trophy, Clock, Target } from "lucide-react"
-import MarkdownRenderer from "./common/MarkdownRenderer"
+'use client'
 
-interface LocationState {
-    answers: (number | null)[]
-    timeTaken: number
-}
+import { useEffect, useRef, useMemo } from "react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { useAuth } from "@/contexts/AuthContext"
+import { quizApi } from "@/services/api"
+import { Question } from "@/types/quiz"
+import { ArrowLeft, Trophy, Clock, Target } from "lucide-react"
+import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 interface QuizQuestion {
     _id?: string
@@ -23,16 +20,19 @@ interface QuizQuestion {
     difficulty?: string
 }
 
-export default function Results() {
-    const { categoryId } = useParams<{ categoryId: string }>()
-    const navigate = useNavigate()
-    const location = useLocation()
+function ResultsContent() {
+    const params = useParams()
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const { user } = useAuth()
 
-    const { answers, timeTaken } = (location.state as LocationState) || {
-        answers: [],
-        timeTaken: 0
-    }
+    const categoryId = params.categoryId as string
+    const answersParam = searchParams.get('answers')
+    const timeTakenParam = searchParams.get('timeTaken')
+
+    const answers: (number | null)[] = useMemo(() => 
+        answersParam ? JSON.parse(answersParam) : [], [answersParam])
+    const timeTaken = timeTakenParam ? parseInt(timeTakenParam) : 0
 
     // Fetch quiz data to get questions for results
     const {
@@ -67,7 +67,6 @@ export default function Results() {
         totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0
 
     // Submit results to TBE webapp API
-
     const hasSubmittedRef = useRef(false)
     
     useEffect(() => {
@@ -98,7 +97,6 @@ export default function Results() {
     
         submitResults()
     }, [user?.id, categoryId, answers, timeTaken])
-    
 
     if (isLoading) {
         return (
@@ -125,7 +123,7 @@ export default function Results() {
                 <div className='max-w-4xl mx-auto px-4 py-4'>
                     <div className='flex items-center justify-between'>
                         <button
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => router.push("/dashboard")}
                             className='flex items-center space-x-2 text-gray-600 hover:text-gray-900'>
                             <ArrowLeft className='w-5 h-5' />
                             <span>Back to Dashboard</span>
@@ -188,12 +186,12 @@ export default function Results() {
                     {/* Action Buttons */}
                     <div className='flex flex-col sm:flex-row gap-4'>
                         <button
-                            onClick={() => navigate(`/quiz/${categoryId}`)}
+                            onClick={() => router.push(`/quiz/${categoryId}`)}
                             className='flex-1 bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors'>
                             Try Again
                         </button>
                         <button
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => router.push("/dashboard")}
                             className='flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors'>
                             Back to Dashboard
                         </button>
@@ -306,5 +304,13 @@ export default function Results() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function Results() {
+    return (
+        <ProtectedRoute>
+            <ResultsContent />
+        </ProtectedRoute>
     )
 }

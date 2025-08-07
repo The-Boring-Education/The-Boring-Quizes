@@ -1,120 +1,131 @@
-# The Boring Quizes
+# The Boring Quizes - Next.js App
 
-A quiz application built with React, TypeScript, and Vite that integrates with The Boring Education webapp APIs.
+A quiz application built with Next.js 13 (App Router), TypeScript, and Tailwind CSS that integrates with The Boring Education webapp APIs.
 
-## Features
+## 🚀 Features
 
--   **Standalone Google OAuth**: Independent authentication system
--   **User Onboarding**: Custom onboarding flow to collect user preferences
--   **Quiz Categories**: Dynamic loading of quiz categories from TBE webapp
--   **Interactive Quizzes**: Timed questions with instant feedback
--   **MDX Support**: Rich text rendering with code syntax highlighting for questions and answers
--   **User Profile**: View and manage user information
--   **Proper Routing**: Clean URL structure with React Router
--   **TBE Webapp Integration**: Full integration with TBE webapp APIs
+- **Next.js 13 App Router**: Modern routing with app directory structure
+- **Server-Side Rendering (SSR)**: Improved performance and SEO
+- **Standalone Google OAuth**: Independent authentication system
+- **User Onboarding**: Custom onboarding flow to collect user preferences
+- **Quiz Categories**: Dynamic loading of quiz categories from TBE webapp
+- **Interactive Quizzes**: Timed questions with instant feedback
+- **MDX Support**: Rich text rendering with code syntax highlighting for questions and answers
+- **User Profile**: View and manage user information
+- **Responsive Design**: Mobile-first design with Tailwind CSS
+- **TBE Webapp Integration**: Full integration with TBE webapp APIs
 
-## Architecture
+## 🏗️ Architecture
 
-This app follows the same pattern as other TBE apps (like Prep Yatra):
+This app follows modern Next.js patterns:
 
--   Handles its own Google OAuth authentication
--   Communicates with TBE webapp APIs for user management
--   Has its own onboarding flow
--   Stores user data locally while syncing with TBE backend
--   Uses React Router for proper page navigation
+- **App Router**: Uses Next.js 13+ app directory structure
+- **Client Components**: Uses 'use client' directive for interactive components
+- **Protected Routes**: HOC-based route protection with authentication checks
+- **SSR-Safe**: Handles localStorage and window access properly for SSR
+- **TypeScript**: Fully typed with comprehensive interfaces
+- **API Integration**: Communicates with TBE webapp APIs for user management
 
-## Setup
+## 🛠️ Setup
 
 1. **Install dependencies**:
-
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 2. **Environment Configuration**:
-   Create a `.env` file in the root directory:
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_TBE_WEBAPP_API_URL=http://localhost:3000
+   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+   NEXT_PUBLIC_ONBOARDING_APP_URL=https://onboard.theboringeducation.com
+   ```
 
-    ```env
-    VITE_TBE_WEBAPP_API_URL=http://localhost:3000
-    VITE_GOOGLE_CLIENT_ID=your-google-client-id
-    ```
+3. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-3. **Run the application**:
-    ```bash
-    npm run dev
-    ```
+4. **Build for production**:
+   ```bash
+   npm run build
+   npm start
+   ```
 
-## TBE Webapp Setup
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── layout.tsx         # Root layout with providers
+│   ├── page.tsx           # Landing page (/)
+│   ├── login/page.tsx     # Login page
+│   ├── dashboard/page.tsx # Dashboard page
+│   ├── quiz/[categoryId]/page.tsx    # Dynamic quiz page
+│   └── results/[categoryId]/page.tsx # Results page
+├── components/            # Reusable components
+│   ├── common/           # Common components
+│   └── ProtectedRoute.tsx # Route protection HOC
+├── contexts/             # React contexts
+│   └── AuthContext.tsx   # Authentication context
+├── providers/            # Provider components
+│   └── QueryProvider.tsx # TanStack Query provider
+├── services/             # API services
+│   └── api.ts           # API client and endpoints
+├── types/                # TypeScript type definitions
+│   ├── auth.ts          # Authentication types
+│   ├── api.ts           # API response types
+│   └── quiz.ts          # Quiz-related types
+└── config/               # Configuration
+    └── index.ts         # Environment and API configuration
+```
+
+## 🔧 TBE Webapp Setup
 
 Make sure the TBE webapp is running and has the following:
 
-1. CORS configured to allow requests from `http://localhost:5173`
+1. CORS configured to allow requests from your Next.js app domain
 2. The quiz API endpoints available at `/api/v1/quiz/*`
 3. User management endpoints at `/api/v1/user/*`
 
-## User Flow
+## 🚦 User Flow
 
-1. User lands on the app and sees the landing page (`/`)
-2. Clicking "Get Started" prompts for Google sign-in (`/login`)
-3. After authentication, new users go through onboarding (`/onboarding`):
-    - Choose username
-    - Select occupation
-    - Select purposes for using the app
-4. Once onboarded, users can access the dashboard (`/dashboard`):
-    - Select quiz categories
-    - View user profile and stats
-5. Taking quizzes (`/quiz/:categoryId`):
-    - Timed questions with progress tracking
-    - Real-time feedback
-6. Viewing results (`/results/:categoryId`):
-    - Detailed score breakdown
-    - Question-by-question review
-    - Submit results to TBE webapp
+1. **Landing Page** (`/`) - Marketing page with app overview
+2. **Authentication** (`/login`) - Google OAuth sign-in
+3. **Onboarding** (External) - Redirects to TBE onboarding app if user not onboarded
+4. **Dashboard** (`/dashboard`) - Quiz categories and user stats
+5. **Quiz Taking** (`/quiz/[categoryId]`) - Timed questions with progress tracking
+6. **Results** (`/results/[categoryId]`) - Score breakdown and question review
 
-## API Integration
+## 🔌 API Integration
 
 The app integrates with TBE webapp through these endpoints:
 
--   `POST /api/v1/user` - Create/find user after Google auth
--   `GET /api/v1/user/onbording?userName={username}` - Check username availability
--   `POST /api/v1/user/onbording?userId={userId}` - Complete user onboarding
--   `GET /api/v1/quiz` - Get available quiz categories
--   `GET /api/v1/quiz/{categoryId}` - Get questions for a category
--   `POST /api/v1/quiz/{categoryId}/attempt` - Submit quiz attempt
+- `POST /api/v1/user` - Create/find user after Google auth
+- `GET /api/v1/user/onbording?userName={username}` - Check username availability
+- `POST /api/v1/user/onbording?userId={userId}` - Complete user onboarding
+- `GET /api/v1/quiz` - Get available quiz categories
+- `GET /api/v1/quiz/{categoryId}` - Get questions for a category
+- `POST /api/v1/quiz/{categoryId}/attempt` - Submit quiz attempt
 
-## Routing Structure
+## 🎨 Styling & UI
 
--   `/` - Landing page
--   `/login` - Google OAuth login
--   `/onboarding` - User onboarding flow (protected)
--   `/dashboard` - Main dashboard with quiz categories (protected)
--   `/quiz/:categoryId` - Take a quiz (protected)
--   `/results/:categoryId` - View quiz results (protected)
+- **Tailwind CSS**: Utility-first CSS framework
+- **Responsive Design**: Mobile-first approach
+- **Dark/Light Theme**: Consistent with TBE brand
+- **Animations**: Smooth transitions and micro-interactions
+- **Typography**: Clean, readable fonts optimized for quizzes
 
-## Development
+## 📱 MDX Support
 
--   Built with Vite for fast development
--   Uses React 18 with TypeScript
--   Styled with Tailwind CSS
--   Icons from Lucide React
--   React Router for navigation
--   TanStack Query for data fetching
--   Google OAuth for authentication
--   React Markdown with syntax highlighting for rich content
-
-## MDX Support
-
-The app now supports rich content rendering for quiz questions and answers:
+Rich content rendering for quiz questions and answers:
 
 ### Features
+- **Code Syntax Highlighting**: Multi-language support via Prism.js
+- **Markdown Formatting**: Bold, italic, lists, blockquotes
+- **Responsive Code Blocks**: Adapts to different screen sizes
 
--   **Code Syntax Highlighting**: Questions can include code snippets with proper syntax highlighting
--   **Markdown Formatting**: Support for **bold**, _italic_, `inline code`, lists, and more
--   **Code Blocks**: Multi-line code examples with language-specific highlighting
--   **Responsive Design**: Code blocks and content adapt to different screen sizes
-
-### Example Question Format
-
+### Example
 ````markdown
 Given the following React component:
 
@@ -124,24 +135,53 @@ const Component = () => {
     return <div>{count}</div>
 }
 ```
-````
 
 What will happen when this component renders?
+````
 
-### Supported Languages
+## 🔒 Security Features
 
--   JavaScript/JSX
--   TypeScript/TSX
--   HTML/CSS
--   JSON
--   And many more via Prism.js
+- **Protected Routes**: Authentication required for quiz pages
+- **Token Management**: Secure token storage and refresh
+- **CORS Configuration**: Proper cross-origin request handling
+- **Environment Variables**: Sensitive data in environment variables
 
-## Key Improvements
+## 🚀 Deployment
 
-1. **Proper Routing**: Each page has its own route instead of all being on `/`
-2. **TBE Webapp Integration**: Full integration with TBE webapp APIs
-3. **Protected Routes**: Authentication and onboarding checks
-4. **Better UX**: Clean navigation and user flow
-5. **API Integration**: Real-time data from TBE webapp
-6. **Type Safety**: Proper TypeScript interfaces for all API calls
-7. **MDX Support**: Rich content rendering with syntax highlighting
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on git push
+
+### Other Platforms
+1. Build the app: `npm run build`
+2. Deploy the `.next` folder and `package.json`
+3. Set environment variables on your platform
+4. Run: `npm start`
+
+## 🧪 Development
+
+- **TypeScript**: Full type safety throughout the app
+- **ESLint**: Code linting with Next.js config
+- **Hot Reload**: Instant updates during development
+- **Error Boundaries**: Graceful error handling
+
+## 📈 Performance
+
+- **Server-Side Rendering**: Faster initial page loads
+- **Static Generation**: Where possible for better performance
+- **Code Splitting**: Automatic code splitting by Next.js
+- **Image Optimization**: Next.js Image component for optimized images
+- **Bundle Analysis**: Can be enabled for size optimization
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+Built with ❤️ by The Boring Education Team
