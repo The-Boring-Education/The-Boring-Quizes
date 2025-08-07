@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
-import { useAuth } from "../contexts/AuthContext"
-import { quizApi } from "../services/api"
-import { QuizCategory } from "../types/quiz"
-import { QuizCategoryAPI } from "../types/api"
-import { User, LogOut, Brain, Trophy, Clock, Target } from "lucide-react"
+'use client'
 
-export default function Dashboard() {
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { useAuth } from "@/contexts/AuthContext"
+import { quizApi } from "@/services/api"
+import { QuizCategory } from "@/types/quiz"
+import { QuizCategoryAPI } from "@/types/api"
+import { User, LogOut, Brain, Trophy, Clock, Target } from "lucide-react"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
+import Image from "next/image"
+
+function DashboardContent() {
     const { user, signOut } = useAuth()
-    const navigate = useNavigate()
+    const router = useRouter()
     const [showUserMenu, setShowUserMenu] = useState(false)
 
     const {
@@ -41,19 +45,19 @@ export default function Dashboard() {
       )
     : 0;
 
-    useEffect(()=>{
-  refetchAttempts();
-    },[])   
+    useEffect(() => {
+        refetchAttempts();
+    }, [refetchAttempts])   
      
     const categories = categoriesData?.data?.data || []
 
     const handleSelectCategory = (category: QuizCategory) => {
-        navigate(`/quiz/${category.id}`)
+        router.push(`/quiz/${category.id}`)
     }
 
     const handleSignOut = async () => {
         await signOut()
-        navigate("/")
+        router.push("/")
     }
 
     // Map API categories to QuizCategory format
@@ -87,9 +91,11 @@ export default function Dashboard() {
                                 onClick={() => setShowUserMenu(!showUserMenu)}
                                 className='flex items-center space-x-3 bg-white border-2 border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors'>
                                 {user?.image ? (
-                                    <img
+                                    <Image
                                         src={user.image}
-                                        alt={user.name}
+                                        alt={user.name || 'User'}
+                                        width={24}
+                                        height={24}
                                         className='w-6 h-6 rounded-full'
                                     />
                                 ) : (
@@ -178,21 +184,6 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
-                    <div className='bg-white rounded-lg shadow p-6 border border-gray-200'>
-                        <div className='flex items-center'>
-                            <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
-                                <Clock className='w-6 h-6 text-purple-600' />
-                            </div>
-                            <div className='ml-4'>
-                                <p className='text-sm font-medium text-gray-600'>
-                                    Time Spent
-                                </p>
-                                <p className='text-2xl font-bold text-gray-900'>
-                                    {totalTimeSpentSeconds}sec
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Quiz Categories */}
@@ -248,5 +239,13 @@ export default function Dashboard() {
                 </div>
             </main>
         </div>
+    )
+}
+
+export default function Dashboard() {
+    return (
+        <ProtectedRoute>
+            <DashboardContent />
+        </ProtectedRoute>
     )
 }

@@ -1,10 +1,13 @@
+'use client'
+
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { quizApi } from "../services/api"
-import { Question } from "../types/quiz"
+import { quizApi } from "@/services/api"
+import { Question } from "@/types/quiz"
 import { ArrowLeft, Clock } from "lucide-react"
-import MarkdownRenderer from "./common/MarkdownRenderer"
+import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 interface QuizQuestion {
     _id?: string
@@ -16,9 +19,11 @@ interface QuizQuestion {
     difficulty?: string
 }
 
-export default function Quiz() {
-    const { categoryId } = useParams<{ categoryId: string }>()
-    const navigate = useNavigate()
+function QuizContent() {
+    const params = useParams()
+    const router = useRouter()
+    const categoryId = params.categoryId as string
+
     const [currentQuestion, setCurrentQuestion] = useState(0)
     const [answers, setAnswers] = useState<(number | null)[]>([])
     const [timeLeft, setTimeLeft] = useState(30)
@@ -73,9 +78,7 @@ export default function Quiz() {
                 // Quiz completed
                 setIsActive(false)
                 const timeTaken = Math.floor((Date.now() - startTime) / 1000)
-                navigate(`/results/${categoryId}`, {
-                    state: { answers: newAnswers, timeTaken }
-                })
+                router.push(`/results/${categoryId}?answers=${JSON.stringify(newAnswers)}&timeTaken=${timeTaken}`)
             }
         },
         [
@@ -84,7 +87,7 @@ export default function Quiz() {
             questions.length,
             isActive,
             startTime,
-            navigate,
+            router,
             categoryId
         ]
     )
@@ -105,9 +108,7 @@ export default function Quiz() {
                         const timeTaken = Math.floor(
                             (Date.now() - startTime) / 1000
                         )
-                        navigate(`/results/${categoryId}`, {
-                            state: { answers, timeTaken }
-                        })
+                        router.push(`/results/${categoryId}?answers=${JSON.stringify(answers)}&timeTaken=${timeTaken}`)
                         return 0
                     }
                 }
@@ -123,7 +124,7 @@ export default function Quiz() {
         questions.length,
         answers,
         startTime,
-        navigate,
+        router,
         categoryId
     ])
 
@@ -154,7 +155,7 @@ export default function Quiz() {
                 <div className='max-w-4xl mx-auto px-4 py-4'>
                     <div className='flex items-center justify-between'>
                         <button
-                            onClick={() => navigate("/dashboard")}
+                            onClick={() => router.push("/dashboard")}
                             className='flex items-center space-x-2 text-gray-600 hover:text-gray-900'>
                             <ArrowLeft className='w-5 h-5' />
                             <span>Back to Dashboard</span>
@@ -237,5 +238,13 @@ export default function Quiz() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function Quiz() {
+    return (
+        <ProtectedRoute>
+            <QuizContent />
+        </ProtectedRoute>
     )
 }

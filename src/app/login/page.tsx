@@ -1,16 +1,18 @@
+'use client'
+
 import { useEffect } from "react"
-import { useAuth } from "../contexts/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
 import { Brain } from "lucide-react"
 
 export default function Login() {
     const { signInWithGoogle, user } = useAuth()
-    const navigate = useNavigate()
+    const router = useRouter()
 
     useEffect(() => {
         if (user) {
             if (user.isOnboarded) {
-                navigate("/dashboard", { replace: true })
+                router.push("/dashboard")
             } else {
                 const params = new URLSearchParams({
                     userId: user.id,
@@ -21,11 +23,11 @@ export default function Login() {
                 })
 
                 window.location.href = `${
-                    import.meta.env.VITE_ONBOARDING_APP_URL
+                    process.env.NEXT_PUBLIC_ONBOARDING_APP_URL
                 }/?${params.toString()}`
             }
         }
-    }, [user, navigate])
+    }, [user, router])
 
     const handleGoogleSignIn = async () => {
         try {
