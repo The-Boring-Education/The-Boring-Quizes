@@ -35,11 +35,6 @@ This app follows modern Next.js patterns:
 
 2. **Environment Configuration**:
    Create a `.env.local` file in the root directory:
-   ```env
-   NEXT_PUBLIC_TBE_WEBAPP_API_URL=http://localhost:3000
-   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-   NEXT_PUBLIC_ONBOARDING_APP_URL=https://onboard.theboringeducation.com
-   ```
 
 3. **Run the development server**:
    ```bash
