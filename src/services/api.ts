@@ -1,59 +1,35 @@
-import axios from "axios"
-import { config, API_ENDPOINTS } from "@/config"
-
-// Create axios instance
-const api = axios.create({
-    baseURL: config.API_BASE_URL,
-    withCredentials: true,
-    headers: {
-        "Content-Type": "application/json"
-    }
-})
-
-// Request interceptor to add auth token
-api.interceptors.request.use(
-    (config) => {
-        if (typeof window !== 'undefined') {
-            const token = localStorage.getItem("quizToken")
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`
-            }
-        }
-        return config
-    },
-    (error) => {
-        return Promise.reject(error)
-    }
-)
-
-// Response interceptor for error handling
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Handle unauthorized - redirect to login
-            if (typeof window !== 'undefined') {
-                window.location.href = "/"
-            }
-        }
-        return Promise.reject(error)
-    }
-)
+import { apiClient, APIError } from "./base"
+import { API_ENDPOINTS } from "@/config"
 
 // User APIs
 export const userApi = {
-    createOrFindUser: (data: {
+    createOrFindUser: async (data: {
         name: string
         email: string
         image?: string
         provider: string
         providerAccountId: string
-    }) => api.post(API_ENDPOINTS.USER_CREATE, data),
+    }) => {
+        try {
+            return await apiClient.post(API_ENDPOINTS.USER_CREATE, data)
+        } catch (error) {
+            console.error("Error creating/finding user:", error)
+            throw error
+        }
+    },
 
-    getUserByEmail: (email: string) =>
-        api.get(`${API_ENDPOINTS.USER_CREATE}?email=${email}`),
+    getUserByEmail: async (email: string) => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.USER_CREATE, {
+                params: { email }
+            })
+        } catch (error) {
+            console.error("Error getting user by email:", error)
+            throw error
+        }
+    },
 
-    onboardUser: (
+    onboardUser: async (
         userId: string,
         data: {
             userName: string
@@ -61,33 +37,99 @@ export const userApi = {
             purpose: string[]
             contactNo?: string
         }
-    ) => api.post(`${API_ENDPOINTS.USER_ONBOARDING}?userId=${userId}`, data),
+    ) => {
+        try {
+            return await apiClient.post(API_ENDPOINTS.USER_ONBOARDING, data, {
+                params: { userId }
+            })
+        } catch (error) {
+            console.error("Error onboarding user:", error)
+            throw error
+        }
+    },
 
-    checkUsername: (userName: string) =>
-        api.get(`${API_ENDPOINTS.USER_ONBOARDING}?userName=${userName}`)
+    checkUsername: async (userName: string) => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.USER_ONBOARDING, {
+                params: { userName }
+            })
+        } catch (error) {
+            console.error("Error checking username:", error)
+            throw error
+        }
+    }
 }
 
 // Auth APIs (for future use)
 export const authApi = {
-    getSession: () => api.get(API_ENDPOINTS.AUTH_SESSION),
-    signOut: () => api.post(API_ENDPOINTS.AUTH_SIGNOUT)
+    getSession: async () => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.AUTH_SESSION)
+        } catch (error) {
+            console.error("Error getting session:", error)
+            throw error
+        }
+    },
+
+    signOut: async () => {
+        try {
+            return await apiClient.post(API_ENDPOINTS.AUTH_SIGNOUT)
+        } catch (error) {
+            console.error("Error signing out:", error)
+            throw error
+        }
+    }
 }
 
 // Quiz APIs
 export const quizApi = {
-    getCategories: () => api.get(API_ENDPOINTS.QUIZ_CATEGORIES),
-    getQuestions: (categoryId: string) =>
-        api.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)),
-    submitAttempt: (
+    getCategories: async () => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.QUIZ_CATEGORIES)
+        } catch (error) {
+            console.error("Error fetching quiz categories:", error)
+            throw error
+        }
+    },
+
+    getQuestions: async (categoryId: string) => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
+        } catch (error) {
+            console.error("Error fetching quiz questions:", error)
+            throw error
+        }
+    },
+
+    submitAttempt: async (
         categoryId: string, 
         data: {
             userId: string
             answers: number[]
             timeTaken: number
         }
-    ) => api.post(`${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, data),
-    getUserAttempts: async (userId: string) =>
-        api.get(`${API_ENDPOINTS.QUIZ_ATTEMPTS}?userId=${userId}`)
+    ) => {
+        try {
+            return await apiClient.post(
+                `${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, 
+                data
+            )
+        } catch (error) {
+            console.error("Error submitting quiz attempt:", error)
+            throw error
+        }
+    },
+
+    getUserAttempts: async (userId: string) => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.QUIZ_ATTEMPTS, {
+                params: { userId }
+            })
+        } catch (error) {
+            console.error("Error fetching user attempts:", error)
+            throw error
+        }
+    }
 }
 
-export default api
+export { apiClient, APIError }

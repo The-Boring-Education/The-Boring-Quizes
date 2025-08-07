@@ -2,8 +2,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google"
-import { userApi } from "@/services/api"
+import { useRouter } from "next/navigation"
+import { userApi, APIError } from "@/services/api"
 import { User, GoogleUserInfo, AuthContextType } from "@/types/auth"
+import { useToast } from "@/components/ui/use-toast"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -20,22 +22,57 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 }) => {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
+    const router = useRouter()
+    const { toast } = useToast()
 
-    // Check for stored user on mount
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedUser = localStorage.getItem("quizUser")
-            if (storedUser) {
-                setUser(JSON.parse(storedUser))
+    // Check authentication status on mount
+    const checkAuth = async () => {
+        try {
+            setLoading(true)
+            
+            if (typeof window !== 'undefined') {
+                const storedUser = localStorage.getItem("quizUser")
+                if (storedUser) {
+                    const userData = JSON.parse(storedUser)
+                    setUser(userData)
+                    
+                    // Verify user still exists in backend
+                    try {
+                        const response = await userApi.getUserByEmail(userData.email)
+                        if (!response?.data?.data) {
+                            // User doesn't exist in backend, clear local data
+                            localStorage.removeItem("quizUser")
+                            localStorage.removeItem("quizToken")
+                            setUser(null)
+                        }
+                    } catch (error) {
+                        // If verification fails, keep user logged in locally
+                        console.warn("Could not verify user with backend:", error)
+                    }
+                }
             }
+        } catch (error) {
+            console.error("Error checking auth:", error)
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem("quizUser")
+                localStorage.removeItem("quizToken")
+            }
+            setUser(null)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
+    }
+
+    useEffect(() => {
+        checkAuth()
     }, [])
 
     const handleGoogleSuccess = async (tokenResponse: {
         access_token: string
     }) => {
         try {
+            setLoading(true)
+            
             // Use access token to fetch user info from Google
             const response = await fetch(
                 `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenResponse.access_token}`
@@ -73,10 +110,27 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     localStorage.setItem("quizUser", JSON.stringify(user))
                     localStorage.setItem("quizToken", tokenResponse.access_token)
                 }
+
+                toast({
+                    title: "Welcome!",
+                    description: `Successfully signed in as ${user.name}`,
+                })
+
+                // Redirect to dashboard if user is onboarded
+                if (user.isOnboarded) {
+                    router.push("/dashboard")
+                }
             }
         } catch (error) {
             console.error("Google sign in failed:", error)
+            toast({
+                title: "Sign in failed",
+                description: error instanceof APIError ? error.message : "Something went wrong",
+                variant: "destructive",
+            })
             throw error
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -112,12 +166,27 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     }
 
     const signOut = async () => {
-        setUser(null)
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem("quizUser")
-            localStorage.removeItem("quizToken")
+        try {
+            setUser(null)
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem("quizUser")
+                localStorage.removeItem("quizToken")
+            }
+            
+            toast({
+                title: "Signed out",
+                description: "You have been successfully signed out",
+            })
+            
+            router.push("/")
+        } catch (error) {
+            console.error("Error signing out:", error)
+            toast({
+                title: "Sign out failed",
+                description: "Something went wrong while signing out",
+                variant: "destructive",
+            })
         }
-        // Don't redirect here, let the ProtectedRoute handle it
     }
 
     const updateUser = (updates: Partial<User>) => {
@@ -160,7 +229,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         signInWithGoogle,
         signOut,
         updateUser,
-        refreshUserFromBackend
+        refreshUserFromBackend,
+        checkAuth
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
