@@ -85,8 +85,8 @@ src/
 Make sure the TBE webapp is running and has the following:
 
 1. CORS configured to allow requests from your Next.js app domain
-2. The quiz API endpoints available at `/api/v1/quiz/*`
-3. User management endpoints at `/api/v1/user/*`
+2. The quiz API endpoints available at `/quiz/*`
+3. User management endpoints at `/user/*`
 
 ## 🚦 User Flow
 
@@ -101,12 +101,12 @@ Make sure the TBE webapp is running and has the following:
 
 The app integrates with TBE webapp through these endpoints:
 
-- `POST /api/v1/user` - Create/find user after Google auth
-- `GET /api/v1/user/onbording?userName={username}` - Check username availability
-- `POST /api/v1/user/onbording?userId={userId}` - Complete user onboarding
-- `GET /api/v1/quiz` - Get available quiz categories
-- `GET /api/v1/quiz/{categoryId}` - Get questions for a category
-- `POST /api/v1/quiz/{categoryId}/attempt` - Submit quiz attempt
+- `POST /user` - Create/find user after Google auth
+- `GET /user/onbording?userName={username}` - Check username availability
+- `POST /user/onbording?userId={userId}` - Complete user onboarding
+- `GET /quiz` - Get available quiz categories
+- `GET /quiz/{categoryId}` - Get questions for a category
+- `POST /quiz/{categoryId}/attempt` - Submit quiz attempt
 
 ## 🎨 Styling & UI
 
