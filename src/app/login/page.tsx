@@ -12,13 +12,15 @@ export default function Login() {
     const { signInWithGoogle, user, loading } = useAuth()
     const router = useRouter()
     const { toast } = useToast()
-    const [isSigningIn, setIsSigningIn] = useState(false)
 
     useEffect(() => {
         if (user) {
+            console.log("User found in login page:", user)
             if (user.isOnboarded) {
+                console.log("User is onboarded, redirecting to dashboard")
                 router.push("/dashboard")
             } else {
+                console.log("User not onboarded, redirecting to onboarding")
                 const params = new URLSearchParams({
                     userId: user.id,
                     from: "quizapp",
@@ -36,9 +38,9 @@ export default function Login() {
 
     const handleGoogleSignIn = async () => {
         try {
-            setIsSigningIn(true)
             await signInWithGoogle()
             // Navigation will be handled by the useEffect above
+            // Note: The actual success/error handling is now done in AuthContext callbacks
         } catch (error) {
             console.error("Login failed:", error)
             toast({
@@ -46,8 +48,6 @@ export default function Login() {
                 description: "Something went wrong. Please try again.",
                 variant: "destructive",
             })
-        } finally {
-            setIsSigningIn(false)
         }
     }
 
@@ -152,10 +152,10 @@ export default function Login() {
                         <CardContent className='space-y-6'>
                             <Button
                                 onClick={handleGoogleSignIn}
-                                disabled={isSigningIn}
+                                disabled={loading}
                                 className='w-full h-12 text-base font-medium bg-white hover:bg-gray-50 text-gray-700 border border-gray-300'
                             >
-                                {isSigningIn ? (
+                                {loading ? (
                                     <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-gray-700 mr-3'></div>
                                 ) : (
                                     <svg className='w-5 h-5 mr-3' viewBox='0 0 24 24'>
@@ -178,7 +178,7 @@ export default function Login() {
                                         <path fill='none' d='M1 1h22v22H1z' />
                                     </svg>
                                 )}
-                                {isSigningIn ? "Signing in..." : "Continue with Google"}
+                                {loading ? "Signing in..." : "Continue with Google"}
                             </Button>
 
                             <div className='text-center text-xs text-muted-foreground'>

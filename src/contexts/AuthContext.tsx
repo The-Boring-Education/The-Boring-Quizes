@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google"
-import { useRouter } from "next/navigation"
 import { userApi, APIError } from "@/services/api"
 import { User, GoogleUserInfo, AuthContextType } from "@/types/auth"
 import { useToast } from "@/components/ui/use-toast"
@@ -22,7 +21,6 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 }) => {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
-    const router = useRouter()
     const { toast } = useToast()
 
     // Check authentication status on mount
@@ -38,7 +36,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     
                     // Verify user still exists in backend
                     try {
-                        const response = await userApi.getUserByEmail(userData.email)
+                        const response = await userApi.getUserByEmail(userData.email) as any
                         if (!response?.data?.data) {
                             // User doesn't exist in backend, clear local data
                             localStorage.removeItem("quizUser")
@@ -91,7 +89,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                 image: googleUserInfo.picture,
                 provider: "google",
                 providerAccountId: googleUserInfo.sub
-            })
+            }) as any
 
             if (userResponse.data?.data) {
                 const userData = userResponse.data.data
@@ -105,6 +103,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     occupation: userData.occupation,
                     purpose: userData.purpose
                 }
+                console.log("Setting user in AuthContext:", user)
                 setUser(user)
                 if (typeof window !== 'undefined') {
                     localStorage.setItem("quizUser", JSON.stringify(user))
@@ -116,10 +115,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     description: `Successfully signed in as ${user.name}`,
                 })
 
-                // Redirect to dashboard if user is onboarded
-                if (user.isOnboarded) {
-                    router.push("/dashboard")
-                }
+                // Note: Redirect will be handled by the consuming component
             }
         } catch (error) {
             console.error("Google sign in failed:", error)
@@ -134,35 +130,43 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         }
     }
 
+    // Create Google login hook at the top level
     const googleLogin = useGoogleLogin({
-        onSuccess: handleGoogleSuccess,
+        onSuccess: async (tokenResponse) => {
+            try {
+                await handleGoogleSuccess(tokenResponse)
+            } catch (error) {
+                console.error("Login success handler failed:", error)
+                toast({
+                    title: "Sign in failed",
+                    description: "Something went wrong during sign in. Please try again.",
+                    variant: "destructive",
+                })
+            } finally {
+                setLoading(false)
+            }
+        },
         onError: (error) => {
             console.error("Login Failed:", error)
-            throw new Error("Google login failed")
+            toast({
+                title: "Sign in failed",
+                description: "Google login failed. Please try again.",
+                variant: "destructive",
+            })
+            setLoading(false)
         }
     })
 
-    const signInWithGoogle = () => {
-        return new Promise<void>((resolve, reject) => {
+    const signInWithGoogle = async () => {
+        try {
+            setLoading(true)
             googleLogin()
-            // The actual success/error handling is done in the callbacks above
-            // This is a bit of a hack, but useGoogleLogin doesn't return a promise
-            const checkForUser = setInterval(() => {
-                if (typeof window !== 'undefined') {
-                    const storedUser = localStorage.getItem("quizUser")
-                    if (storedUser) {
-                        clearInterval(checkForUser)
-                        resolve()
-                    }
-                }
-            }, 100)
-
-            // Timeout after 30 seconds
-            setTimeout(() => {
-                clearInterval(checkForUser)
-                reject(new Error("Login timeout"))
-            }, 30000)
-        })
+            // Note: Loading state will be reset in the success/error callbacks
+        } catch (error) {
+            console.error("Error initiating Google login:", error)
+            setLoading(false)
+            throw error
+        }
     }
 
     const signOut = async () => {
@@ -177,8 +181,6 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                 title: "Signed out",
                 description: "You have been successfully signed out",
             })
-            
-            router.push("/")
         } catch (error) {
             console.error("Error signing out:", error)
             toast({
@@ -201,7 +203,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
     const refreshUserFromBackend = async () => {
         try {
-          const response = await userApi.getUserByEmail(user?.email || "");
+          const response = await userApi.getUserByEmail(user?.email || "") as any;
           const data = response.data.data;
       
           const updatedUser: User = {
