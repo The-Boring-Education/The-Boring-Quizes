@@ -1,8 +1,9 @@
+'use client'
+
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google"
-import { userApi } from "../services/api"
-import { config } from "../config"
-import { User, GoogleUserInfo, AuthContextType } from "../types/auth"
+import { userApi } from "@/services/api"
+import { User, GoogleUserInfo, AuthContextType } from "@/types/auth"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -22,9 +23,11 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
     // Check for stored user on mount
     useEffect(() => {
-        const storedUser = localStorage.getItem("quizUser")
-        if (storedUser) {
-            setUser(JSON.parse(storedUser))
+        if (typeof window !== 'undefined') {
+            const storedUser = localStorage.getItem("quizUser")
+            if (storedUser) {
+                setUser(JSON.parse(storedUser))
+            }
         }
         setLoading(false)
     }, [])
@@ -66,8 +69,10 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     purpose: userData.purpose
                 }
                 setUser(user)
-                localStorage.setItem("quizUser", JSON.stringify(user))
-                localStorage.setItem("quizToken", tokenResponse.access_token)
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem("quizUser", JSON.stringify(user))
+                    localStorage.setItem("quizToken", tokenResponse.access_token)
+                }
             }
         } catch (error) {
             console.error("Google sign in failed:", error)
@@ -89,10 +94,12 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             // The actual success/error handling is done in the callbacks above
             // This is a bit of a hack, but useGoogleLogin doesn't return a promise
             const checkForUser = setInterval(() => {
-                const storedUser = localStorage.getItem("quizUser")
-                if (storedUser) {
-                    clearInterval(checkForUser)
-                    resolve()
+                if (typeof window !== 'undefined') {
+                    const storedUser = localStorage.getItem("quizUser")
+                    if (storedUser) {
+                        clearInterval(checkForUser)
+                        resolve()
+                    }
                 }
             }, 100)
 
@@ -106,8 +113,10 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
     const signOut = async () => {
         setUser(null)
-        localStorage.removeItem("quizUser")
-        localStorage.removeItem("quizToken")
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem("quizUser")
+            localStorage.removeItem("quizToken")
+        }
         // Don't redirect here, let the ProtectedRoute handle it
     }
 
@@ -115,7 +124,9 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         if (user) {
             const updatedUser = { ...user, ...updates }
             setUser(updatedUser)
-            localStorage.setItem("quizUser", JSON.stringify(updatedUser))
+            if (typeof window !== 'undefined') {
+                localStorage.setItem("quizUser", JSON.stringify(updatedUser))
+            }
         }
     }
 
@@ -136,11 +147,12 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
           };
             
           setUser(updatedUser);
-          localStorage.setItem("quizUser", JSON.stringify(updatedUser));
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("quizUser", JSON.stringify(updatedUser));
+          }
         } catch (error) {
         }
       };
-      
 
     const value = {
         user,
@@ -157,8 +169,15 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     children
 }) => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
+    if (!googleClientId) {
+        console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined")
+        return <div>Google Client ID not configured</div>
+    }
+
     return (
-        <GoogleOAuthProvider clientId={config.GOOGLE_CLIENT_ID}>
+        <GoogleOAuthProvider clientId={googleClientId}>
             <AuthProviderInner>{children}</AuthProviderInner>
         </GoogleOAuthProvider>
     )

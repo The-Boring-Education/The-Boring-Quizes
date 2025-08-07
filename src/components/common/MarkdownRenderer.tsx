@@ -14,7 +14,7 @@ interface CodeProps {
     children?: ReactNode
 }
 
-export default function MarkdownRenderer({
+export function MarkdownRenderer({
     content,
     className = ""
 }: MarkdownRendererProps) {
