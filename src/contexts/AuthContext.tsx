@@ -32,7 +32,11 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                 const storedUser = localStorage.getItem("quizUser")
                 if (storedUser) {
                     const userData = JSON.parse(storedUser)
+                    // Ensure isOnboarded is true for quiz app users
+                    userData.isOnboarded = userData.isOnboarded || true
                     setUser(userData)
+                    // Update localStorage with corrected user data
+                    localStorage.setItem("quizUser", JSON.stringify(userData))
                     
                     // Verify user still exists in backend
                     try {
@@ -90,15 +94,16 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                 provider: "google",
                 providerAccountId: googleUserInfo.sub
             }) as any
+            console.log("User response:", userResponse)
 
-            if (userResponse.data?.data) {
-                const userData = userResponse.data.data
+            if (userResponse.data) {
+                const userData = userResponse.data
                 const user: User = {
                     id: userData._id,
                     name: userData.name,
                     email: userData.email,
                     image: userData.image,
-                    isOnboarded: userData.isOnboarded || false,
+                    isOnboarded: userData.isOnboarded || true, // Set to true for quiz app users
                     userName: userData.userName,
                     occupation: userData.occupation,
                     purpose: userData.purpose
@@ -211,7 +216,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             name: data.name,
             email: data.email,
             image: data.image,
-            isOnboarded: data.isOnboarded || false,
+            isOnboarded: data.isOnboarded || true, // Set to true for quiz app users
             userName: data.userName,
             occupation: data.occupation,
             purpose: data.purpose,
