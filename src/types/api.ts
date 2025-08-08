@@ -45,3 +45,39 @@ export interface QuizCategoryAPI {
     categoryDescription: string
     categoryIcon: string
 }
+
+// Generic API Response wrapper
+export interface APIResponse<T> {
+    success: boolean
+    message: string
+    data: T
+}
+
+// Specific response types
+export interface QuizAttemptsResponse {
+    data: QuizAttempt[]
+}
+
+export interface QuizCategoriesResponse {
+    data: QuizCategoryAPI[]
+}
+
+// Quiz Question interfaces
+export interface QuizQuestion {
+    _id?: string
+    question: string
+    options: string[]
+    correctAnswer: number
+    explanation: string
+    detailedExplanation?: string
+    difficulty?: string
+}
+
+export interface QuizQuestionsData {
+    categoryName: string
+    questions: QuizQuestion[]
+}
+
+export interface QuizQuestionsResponse {
+    data: QuizQuestionsData
+}
