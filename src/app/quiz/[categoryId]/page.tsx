@@ -5,19 +5,10 @@ import { useParams, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { quizApi } from "@/services/api"
 import { Question } from "@/types/quiz"
+import { APIResponse, QuizQuestionsResponse, QuizQuestion } from "@/types/api"
 import { ArrowLeft, Clock } from "lucide-react"
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
-
-interface QuizQuestion {
-    _id?: string
-    question: string
-    options: string[]
-    correctAnswer: number
-    explanation: string
-    detailedExplanation?: string
-    difficulty?: string
-}
 
 function QuizContent() {
     const params = useParams()
@@ -35,7 +26,7 @@ function QuizContent() {
         data: quizData,
         isLoading,
         error
-    } = useQuery({
+    } = useQuery<APIResponse<QuizQuestionsResponse>>({
         queryKey: ["quiz", categoryId],
         queryFn: () => quizApi.getQuestions(categoryId!),
         enabled: !!categoryId

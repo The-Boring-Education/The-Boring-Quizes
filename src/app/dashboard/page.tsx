@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi, APIError } from "@/services/api"
 import { QuizCategory } from "@/types/quiz"
-import { QuizCategoryAPI } from "@/types/api"
+import { QuizCategoryAPI, APIResponse, QuizCategoriesResponse, QuizAttemptsResponse } from "@/types/api"
 import { User, LogOut, Brain, Trophy, Clock, Target, Menu, X, ChevronDown } from "lucide-react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,7 +34,7 @@ function DashboardContent() {
         data: categoriesData,
         isLoading: categoriesLoading,
         error: categoriesError
-    } = useQuery({
+    } = useQuery<APIResponse<QuizCategoriesResponse>>({
         queryKey: ["quiz-categories"],
         queryFn: async () => {
             try {
@@ -56,10 +56,10 @@ function DashboardContent() {
         data: attemptsData,
         refetch: refetchAttempts,
         isLoading: attemptsLoading
-    } = useQuery({
+    } = useQuery<APIResponse<QuizAttemptsResponse>>({
         queryKey: ["quiz-attempts", user?.id],
         queryFn: async () => {
-            if (!user?.id) return { data: { data: [] } }
+            if (!user?.id) return { success: true, message: "No user", data: { data: [] } }
             try {
                 return await quizApi.getUserAttempts(user.id)
             } catch (error) {
