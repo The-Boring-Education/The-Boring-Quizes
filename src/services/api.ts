@@ -1,6 +1,6 @@
 import { apiClient, APIError } from "./base"
 import { API_ENDPOINTS } from "@/config"
-import { APIResponse, QuizCategoriesResponse, QuizAttemptsResponse, QuizQuestionsResponse } from "@/types/api"
+import { APIResponse, QuizAttemptsResponse, QuizCategoryAPI, QuizQuestionsData } from "@/types/api"
 
 // User APIs
 export const userApi = {
@@ -84,18 +84,18 @@ export const authApi = {
 
 // Quiz APIs
 export const quizApi = {
-    getCategories: async (): Promise<APIResponse<QuizCategoriesResponse>> => {
+    getCategories: async (): Promise<APIResponse<QuizCategoryAPI[]>> => {
         try {
-            return await apiClient.get<APIResponse<QuizCategoriesResponse>>(API_ENDPOINTS.QUIZ_CATEGORIES)
+            return await apiClient.get<APIResponse<QuizCategoryAPI[]>>(API_ENDPOINTS.QUIZ_CATEGORIES)
         } catch (error) {
             console.error("Error fetching quiz categories:", error)
             throw error
         }
     },
 
-    getQuestions: async (categoryId: string): Promise<APIResponse<QuizQuestionsResponse>> => {
+    getQuestions: async (categoryId: string): Promise<APIResponse<QuizQuestionsData>> => {
         try {
-            return await apiClient.get<APIResponse<QuizQuestionsResponse>>(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
+            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
         } catch (error) {
             console.error("Error fetching quiz questions:", error)
             throw error

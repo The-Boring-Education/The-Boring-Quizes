@@ -46,14 +46,14 @@ function ResultsContent() {
     })
 
     const questions: Question[] =
-        quizData?.data?.data?.questions?.map((q: QuizQuestion) => ({
+        quizData?.data?.questions?.map((q: QuizQuestion) => ({
             id: q._id || Math.random(),
             question: q.question,
             options: q.options,
             correctAnswer: q.correctAnswer,
             explanation: q.explanation,
             detailedExplanation: q.detailedExplanation || q.explanation,
-            category: quizData?.data?.data?.categoryName || "",
+            category: quizData?.data?.categoryName || "",
             difficulty: q.difficulty || "medium"
         })) || []
 

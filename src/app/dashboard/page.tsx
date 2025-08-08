@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi, APIError } from "@/services/api"
 import { QuizCategory } from "@/types/quiz"
-import { QuizCategoryAPI, APIResponse, QuizCategoriesResponse, QuizAttemptsResponse } from "@/types/api"
+import { QuizCategoryAPI, APIResponse, QuizAttemptsResponse } from "@/types/api"
 import { User, LogOut, Brain, Trophy, Clock, Target, Menu, X, ChevronDown } from "lucide-react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,7 +34,7 @@ function DashboardContent() {
         data: categoriesData,
         isLoading: categoriesLoading,
         error: categoriesError
-    } = useQuery<APIResponse<QuizCategoriesResponse>>({
+    } = useQuery<APIResponse<QuizCategoryAPI[]>>({
         queryKey: ["quiz-categories"],
         queryFn: async () => {
             try {
@@ -92,7 +92,7 @@ function DashboardContent() {
         refetchAttempts();
     }, [refetchAttempts])   
      
-    const categories = categoriesData?.data?.data || []
+    const categories = categoriesData?.data || []
 
     const handleSelectCategory = (category: QuizCategory) => {
         router.push(`/quiz/${category.id}`)
