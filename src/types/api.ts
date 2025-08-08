@@ -40,8 +40,41 @@ export interface LeaderboardEntry {
 }
 
 export interface QuizCategoryAPI {
+    _id: string
     categoryId: string
     categoryName: string
     categoryDescription: string
     categoryIcon: string
+}
+
+// Generic API Response wrapper
+export interface APIResponse<T> {
+    success: boolean
+    message?: string
+    data: T
+}
+
+// Specific response types  
+export interface QuizCategoriesResponse {
+    data: QuizCategoryAPI[]
+}
+
+// Quiz Question interfaces
+export interface QuizQuestion {
+    _id?: string
+    question: string
+    options: string[]
+    correctAnswer: number
+    explanation: string
+    detailedExplanation?: string
+    difficulty?: string
+}
+
+export interface QuizQuestionsData {
+    _id: string
+    categoryId: string
+    categoryName: string
+    categoryDescription: string
+    categoryIcon: string
+    questions: QuizQuestion[]
 }

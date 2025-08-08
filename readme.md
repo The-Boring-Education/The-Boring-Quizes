@@ -35,11 +35,6 @@ This app follows modern Next.js patterns:
 
 2. **Environment Configuration**:
    Create a `.env.local` file in the root directory:
-   ```env
-   NEXT_PUBLIC_TBE_WEBAPP_API_URL=http://localhost:3000
-   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-   NEXT_PUBLIC_ONBOARDING_APP_URL=https://onboard.theboringeducation.com
-   ```
 
 3. **Run the development server**:
    ```bash
@@ -102,8 +97,8 @@ Make sure the TBE webapp is running and has the following:
 The app integrates with TBE webapp through these endpoints:
 
 - `POST /user` - Create/find user after Google auth
-- `GET /user/onbording?userName={username}` - Check username availability
-- `POST /user/onbording?userId={userId}` - Complete user onboarding
+- `GET /user/onboarding?userName={username}` - Check username availability
+- `POST /user/onboarding?userId={userId}` - Complete user onboarding
 - `GET /quiz` - Get available quiz categories
 - `GET /quiz/{categoryId}` - Get questions for a category
 - `POST /quiz/{categoryId}/attempt` - Submit quiz attempt

@@ -1,26 +1,26 @@
 export const config = {
-    API_BASE_URL: process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL,
-    GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-    ONBOARDING_APP_URL: process.env.NEXT_PUBLIC_ONBOARDING_APP_URL
+    API_BASE_URL: process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL as string,
+    GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
+    ONBOARDING_APP_URL: process.env.NEXT_PUBLIC_ONBOARDING_APP_URL as string
 }
 
 export const API_ENDPOINTS = {
     // Auth
-    AUTH_SESSION: "/auth/session",
-    AUTH_SIGNOUT: "/auth/signout",
+    AUTH_SESSION: "/api/v1/auth/session",
+    AUTH_SIGNOUT: "/api/v1/auth/signout",
 
     // Quiz - Updated to match TBE webapp structure
-    QUIZ_CATEGORIES: "/quiz",
-    QUIZ_QUESTIONS: (categoryId: string) => `/quiz/${categoryId}`,
-    QUIZ_SUBMIT: "/quiz/submit",
-    QUIZ_HISTORY: "/quiz/history",
-    QUIZ_ATTEMPTS: "/quiz/attempts",
+    QUIZ_CATEGORIES: "/api/v1/quiz",
+    QUIZ_QUESTIONS: (categoryId: string) => `/api/v1/quiz/${categoryId}`,
+    QUIZ_SUBMIT: "/api/v1/quiz/submit",
+    QUIZ_HISTORY: "/api/v1/quiz/history",
+    QUIZ_ATTEMPTS: "/api/v1/quiz/attempts",
 
     // User
-    USER_CREATE: "/user",
-    USER_ONBOARDING: "/user/onbording",
+    USER_CREATE: "/api/v1/user",
+    USER_ONBOARDING: "/api/v1/user/onboarding",
 
     // Gamification
-    USER_POINTS: "/gamification/points",
-    LEADERBOARD: "/gamification/leaderboard"
+    USER_POINTS: "/api/v1/gamification/points",
+    LEADERBOARD: "/api/v1/gamification/leaderboard"
 }
