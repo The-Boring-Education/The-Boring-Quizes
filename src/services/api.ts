@@ -1,6 +1,6 @@
 import { apiClient, APIError } from "./base"
 import { API_ENDPOINTS } from "@/config"
-import { APIResponse, QuizAttemptsResponse, QuizCategoryAPI, QuizQuestionsData } from "@/types/api"
+import { APIResponse, QuizCategoryAPI, QuizQuestionsData, QuizAttempt } from "@/types/api"
 
 // User APIs
 export const userApi = {
@@ -121,9 +121,9 @@ export const quizApi = {
         }
     },
 
-    getUserAttempts: async (userId: string): Promise<APIResponse<QuizAttemptsResponse>> => {
+    getUserAttempts: async (userId: string): Promise<APIResponse<QuizAttempt[]>> => {
         try {
-            return await apiClient.get<APIResponse<QuizAttemptsResponse>>(API_ENDPOINTS.QUIZ_ATTEMPTS, {
+            return await apiClient.get<APIResponse<QuizAttempt[]>>(API_ENDPOINTS.QUIZ_ATTEMPTS, {
                 params: { userId }
             })
         } catch (error) {

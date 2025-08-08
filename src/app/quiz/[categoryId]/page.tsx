@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { quizApi } from "@/services/api"
 import { Question } from "@/types/quiz"
 import { APIResponse, QuizQuestionsData, QuizQuestion } from "@/types/api"
-import { ArrowLeft, Clock } from "lucide-react"
+import { ArrowLeft, Clock, AlertTriangle, X } from "lucide-react"
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 
@@ -20,6 +20,7 @@ function QuizContent() {
     const [timeLeft, setTimeLeft] = useState(30)
     const [startTime] = useState(Date.now())
     const [isActive, setIsActive] = useState(true)
+    const [showExitConfirmation, setShowExitConfirmation] = useState(false)
 
     // Fetch quiz data from TBE webapp API
     const {
@@ -53,6 +54,41 @@ function QuizContent() {
             setAnswers(new Array(questions.length).fill(null))
         }
     }, [questions, answers.length])
+
+    // Handle browser navigation warning
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isActive && answers.some(answer => answer !== null)) {
+                e.preventDefault()
+                e.returnValue = 'Are you sure you want to leave? Your quiz progress will be lost.'
+                return 'Are you sure you want to leave? Your quiz progress will be lost.'
+            }
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    }, [isActive, answers])
+
+    // Handle back button confirmation
+    const handleBackToDashboard = () => {
+        if (isActive && answers.some(answer => answer !== null)) {
+            setShowExitConfirmation(true)
+        } else {
+            router.push("/dashboard")
+        }
+    }
+
+    // Confirm exit
+    const confirmExit = () => {
+        setIsActive(false)
+        setShowExitConfirmation(false)
+        router.push("/dashboard")
+    }
+
+    // Cancel exit
+    const cancelExit = () => {
+        setShowExitConfirmation(false)
+    }
 
     const handleAnswerSelect = useCallback(
         (answerIndex: number) => {
@@ -146,8 +182,8 @@ function QuizContent() {
                 <div className='max-w-4xl mx-auto px-4 py-4'>
                     <div className='flex items-center justify-between'>
                         <button
-                            onClick={() => router.push("/dashboard")}
-                            className='flex items-center space-x-2 text-gray-600 hover:text-gray-900'>
+                            onClick={handleBackToDashboard}
+                            className='flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors'>
                             <ArrowLeft className='w-5 h-5' />
                             <span>Back to Dashboard</span>
                         </button>
@@ -228,6 +264,49 @@ function QuizContent() {
                     </div>
                 </div>
             </div>
+
+            {/* Exit Confirmation Dialog */}
+            {showExitConfirmation && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                        Leave Quiz?
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                        Your progress will be lost
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <p className="text-gray-700 mb-6">
+                                You have answered {answers.filter(a => a !== null).length} out of {questions.length} questions. 
+                                If you leave now, your progress will not be saved.
+                            </p>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={cancelExit}
+                                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                                >
+                                    Continue Quiz
+                                </button>
+                                <button
+                                    onClick={confirmExit}
+                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                                >
+                                    Leave Quiz
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
