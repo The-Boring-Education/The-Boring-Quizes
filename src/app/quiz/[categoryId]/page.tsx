@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { quizApi } from "@/services/api"
 import { Question } from "@/types/quiz"
-import { APIResponse, QuizQuestionsResponse, QuizQuestion } from "@/types/api"
+import { APIResponse, QuizQuestionsData, QuizQuestion } from "@/types/api"
 import { ArrowLeft, Clock } from "lucide-react"
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
@@ -26,7 +26,7 @@ function QuizContent() {
         data: quizData,
         isLoading,
         error
-    } = useQuery<APIResponse<QuizQuestionsResponse>>({
+    } = useQuery<APIResponse<QuizQuestionsData>>({
         queryKey: ["quiz", categoryId],
         queryFn: () => quizApi.getQuestions(categoryId!),
         enabled: !!categoryId
@@ -34,18 +34,18 @@ function QuizContent() {
 
     const questions: Question[] = useMemo(() => {
         return (
-            quizData?.data?.data?.questions?.map((q: QuizQuestion) => ({
+            quizData?.data?.questions?.map((q: QuizQuestion) => ({
                 id: q._id || Math.random(),
                 question: q.question,
                 options: q.options,
                 correctAnswer: q.correctAnswer,
                 explanation: q.explanation,
                 detailedExplanation: q.detailedExplanation || q.explanation,
-                category: quizData?.data?.data?.categoryName || "",
+                category: quizData?.data?.categoryName || "",
                 difficulty: q.difficulty || "medium"
             })) || []
         )
-    }, [quizData?.data?.data?.questions, quizData?.data?.data?.categoryName])
+    }, [quizData?.data?.questions, quizData?.data?.categoryName])
 
     // Initialize answers array when questions are loaded
     useEffect(() => {

@@ -40,6 +40,7 @@ export interface LeaderboardEntry {
 }
 
 export interface QuizCategoryAPI {
+    _id: string
     categoryId: string
     categoryName: string
     categoryDescription: string
@@ -49,7 +50,7 @@ export interface QuizCategoryAPI {
 // Generic API Response wrapper
 export interface APIResponse<T> {
     success: boolean
-    message: string
+    message?: string
     data: T
 }
 
@@ -74,10 +75,10 @@ export interface QuizQuestion {
 }
 
 export interface QuizQuestionsData {
+    _id: string
+    categoryId: string
     categoryName: string
+    categoryDescription: string
+    categoryIcon: string
     questions: QuizQuestion[]
-}
-
-export interface QuizQuestionsResponse {
-    data: QuizQuestionsData
 }
