@@ -54,11 +54,7 @@ export interface APIResponse<T> {
     data: T
 }
 
-// Specific response types
-export interface QuizAttemptsResponse {
-    data: QuizAttempt[]
-}
-
+// Specific response types  
 export interface QuizCategoriesResponse {
     data: QuizCategoryAPI[]
 }

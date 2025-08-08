@@ -6,8 +6,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi, APIError } from "@/services/api"
 import { QuizCategory } from "@/types/quiz"
-import { QuizCategoryAPI, APIResponse, QuizAttemptsResponse } from "@/types/api"
-import { User, LogOut, Brain, Trophy, Clock, Target, Menu, X, ChevronDown } from "lucide-react"
+import { QuizCategoryAPI, APIResponse, QuizAttempt } from "@/types/api"
+import { User, LogOut, Brain, Trophy, Clock, Target, Menu, X, ChevronDown, Play, ArrowRight, CheckCircle, BookOpen, Zap } from "lucide-react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -56,10 +56,10 @@ function DashboardContent() {
         data: attemptsData,
         refetch: refetchAttempts,
         isLoading: attemptsLoading
-    } = useQuery<APIResponse<QuizAttemptsResponse>>({
+    } = useQuery<APIResponse<QuizAttempt[]>>({
         queryKey: ["quiz-attempts", user?.id],
         queryFn: async () => {
-            if (!user?.id) return { success: true, message: "No user", data: { data: [] } }
+            if (!user?.id) return { success: true, message: "No user", data: [] }
             try {
                 return await quizApi.getUserAttempts(user.id)
             } catch (error) {
@@ -76,15 +76,15 @@ function DashboardContent() {
         enabled: !!user?.id
     })
 
-    const attempts = attemptsData?.data?.data || []
+    const attempts = attemptsData?.data || []
 
     const totalQuizzes = attempts.length
-    const totalTimeSpentSeconds = attempts.reduce((sum: number, a: any) => sum + (a.timeTaken || 0), 0)
+    const totalTimeSpentSeconds = attempts.reduce((sum: number, attempt: QuizAttempt) => sum + (attempt.timeTaken || 0), 0)
     const totalTimeSpentMinutes = Math.floor(totalTimeSpentSeconds / 60)   
     const averageScore =
   attempts.length > 0
     ? Math.round(
-        attempts.reduce((sum:number, a:any) => sum + (a.score || 0), 0) / attempts.length
+        attempts.reduce((sum: number, attempt: QuizAttempt) => sum + (attempt.score || 0), 0) / attempts.length
       )
     : 0;
 
@@ -124,6 +124,36 @@ function DashboardContent() {
             .slice(0, 2)
     }
 
+    // Color mapping for different quiz categories
+    const getCategoryColor = (categoryId: string) => {
+        const colorMap: Record<string, string> = {
+            'javascript-quiz': 'from-yellow-500 to-orange-500',
+            'react-js-quiz': 'from-blue-500 to-cyan-500',
+            'python-quiz': 'from-green-500 to-emerald-500',
+            'web-dev-quiz': 'from-purple-500 to-pink-500',
+        }
+        return colorMap[categoryId] || 'from-gray-500 to-slate-500'
+    }
+
+    // Get user's progress for each category
+    const getCategoryProgress = (categoryId: string) => {
+        const categoryAttempts = attempts.filter((attempt: QuizAttempt) => 
+            attempt.categoryId === categoryId
+        )
+        
+        if (categoryAttempts.length === 0) return null
+        
+        const bestAttempt = categoryAttempts.reduce((best: QuizAttempt, current: QuizAttempt) => 
+            current.score > best.score ? current : best
+        )
+        
+        return {
+            attempts: categoryAttempts.length,
+            bestScore: bestAttempt.score,
+            completed: categoryAttempts.length > 0
+        }
+    }
+
     // Map API categories to QuizCategory format
     const transformedCategories: QuizCategory[] = categories.map(
         (cat: QuizCategoryAPI) => ({
@@ -132,7 +162,7 @@ function DashboardContent() {
             description: cat.categoryDescription,
             icon: cat.categoryIcon,
             questions: [], // Will be loaded when category is selected
-            color: "blue" // Default color
+            color: getCategoryColor(cat.categoryId)
         })
     )
 
@@ -313,29 +343,74 @@ function DashboardContent() {
 
                         {!categoriesLoading && !categoriesError && (
                             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                                {transformedCategories.map((category, index) => (
-                                    <Card
-                                        key={category.id}
-                                        className='cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 glass-dark border-primary/20 hover:border-primary/40 animate-fade-in'
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                        onClick={() => handleSelectCategory(category)}
-                                    >
-                                        <CardContent className='p-6 flex flex-col h-full'>
-                                            <div className='text-xl font-bold mb-3 text-primary'>
-                                                {category.name}
+                                {transformedCategories.map((category, index) => {
+                                    const progress = getCategoryProgress(category.id)
+                                    
+                                    return (
+                                        <Card
+                                            key={category.id}
+                                            className='group cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 border border-gray-300 hover:border-primary/30 animate-fade-in overflow-hidden'
+                                            style={{ animationDelay: `${index * 0.1}s` }}
+                                            onClick={() => handleSelectCategory(category)}
+                                        >
+                                            {/* Gradient Header */}
+                                            <div className={`h-20 bg-gradient-to-r ${category.color} relative overflow-hidden`}>
+                                                <div className="absolute inset-0 bg-black/20"></div>
+                                                <div className="absolute top-3 right-3">
+                                                    {progress?.completed && (
+                                                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-1">
+                                                            <CheckCircle className="w-4 h-4 text-white" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="absolute bottom-3 left-4">
+                                                    <div className="text-3xl">
+                                                        {category.icon}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className='text-sm text-muted-foreground mb-6 flex-1 line-clamp-3'>
-                                                {category.description}
-                                            </div>
-                                            <Button 
-                                                className='w-full bg-primary text-primary-foreground hover:bg-primary/90'
-                                                size="sm"
-                                            >
-                                                Start Quiz →
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
+
+                                            <CardContent className='p-6 flex flex-col h-full'>
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div className='text-xl font-bold text-foreground group-hover:text-primary transition-colors'>
+                                                        {category.name}
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                                                        <span className="text-xs text-muted-foreground">Quiz</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Progress Indicator */}
+                                                {progress && (
+                                                    <div className="mb-3 p-2 bg-muted/30 rounded-lg">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                            <span className="text-muted-foreground">Best Score</span>
+                                                            <span className="font-medium text-primary">{progress.bestScore}%</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between text-xs mt-1">
+                                                            <span className="text-muted-foreground">Attempts</span>
+                                                            <span className="font-medium">{progress.attempts}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                <div className='text-sm text-muted-foreground mb-6 flex-1 leading-relaxed'>
+                                                    {category.description}
+                                                </div>
+                                                
+                                                <Button 
+                                                    className='w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-300 group-hover:scale-105 shadow-lg'
+                                                    size="sm"
+                                                >
+                                                    <Play className="w-4 h-4 mr-2" />
+                                                    {progress?.completed ? 'Play Again' : 'Start Quiz'}
+                                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    )
+                                })}
                             </div>
                         )}
 
