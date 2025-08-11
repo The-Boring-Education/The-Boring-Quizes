@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
+import { config } from "@/config"
 import {
     Play,
     Brain,
@@ -25,7 +26,15 @@ export default function Landing() {
             if (user.isOnboarded) {
                 router.push("/dashboard")
             } else {
-                router.push("/onboarding")
+                // Redirect to external onboarding app
+                const params = new URLSearchParams({
+                    userId: user.id,
+                    from: "quizapp",
+                    redirect: `${window.location.origin}/dashboard?onboardingComplete=true`
+                })
+                
+                const onboardingURL = `${config.ONBOARDING_APP_URL}/?${params.toString()}`
+                window.location.href = onboardingURL
             }
         }
     }, [user, router])
@@ -35,7 +44,15 @@ export default function Landing() {
             if (user.isOnboarded) {
                 router.push("/dashboard")
             } else {
-                router.push("/onboarding")
+                // Redirect to external onboarding app
+                const params = new URLSearchParams({
+                    userId: user.id,
+                    from: "quizapp",
+                    redirect: `${window.location.origin}/dashboard?onboardingComplete=true`
+                })
+                
+                const onboardingURL = `${config.ONBOARDING_APP_URL}/?${params.toString()}`
+                window.location.href = onboardingURL
             }
         } else {
             router.push("/login")
