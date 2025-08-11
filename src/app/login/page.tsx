@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
+import { config } from "@/config"
 import { Brain, Sparkles, Trophy, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,7 +31,7 @@ export default function Login() {
                 })
 
                 window.location.href = `${
-                    process.env.NEXT_PUBLIC_ONBOARDING_APP_URL
+                    config.ONBOARDING_APP_URL
                 }/?${params.toString()}`
             }
         }
