@@ -31,12 +31,11 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             if (typeof window !== 'undefined') {
                 const storedUser = localStorage.getItem("quizUser")
                 if (storedUser) {
+
                     const userData = JSON.parse(storedUser)
-                    // Ensure isOnboarded is true for quiz app users
-                    userData.isOnboarded = userData.isOnboarded || true
+                    // Use the actual isOnboarded value from stored data
+                    console.log("checkAuth: Setting user from localStorage:", userData)
                     setUser(userData)
-                    // Update localStorage with corrected user data
-                    localStorage.setItem("quizUser", JSON.stringify(userData))
                     
                     // Verify user still exists in backend
                     try {
@@ -46,6 +45,21 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                             localStorage.removeItem("quizUser")
                             localStorage.removeItem("quizToken")
                             setUser(null)
+                        } else {
+                            // Update user data from backend to ensure it's current
+                            const backendUserData = response.data.data
+                            const updatedUser: User = {
+                                id: backendUserData._id,
+                                name: backendUserData.name,
+                                email: backendUserData.email,
+                                image: backendUserData.image,
+                                isOnboarded: backendUserData.isOnboarded,
+                                userName: backendUserData.userName,
+                                occupation: backendUserData.occupation,
+                                purpose: backendUserData.purpose
+                            }
+                            setUser(updatedUser)
+                            localStorage.setItem("quizUser", JSON.stringify(updatedUser))
                         }
                     } catch (error) {
                         // If verification fails, keep user logged in locally
@@ -103,7 +117,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     name: userData.name,
                     email: userData.email,
                     image: userData.image,
-                    isOnboarded: userData.isOnboarded || true, // Set to true for quiz app users
+                    isOnboarded: userData.isOnboarded, // Use the actual value from backend
                     userName: userData.userName,
                     occupation: userData.occupation,
                     purpose: userData.purpose
@@ -216,7 +230,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             name: data.name,
             email: data.email,
             image: data.image,
-            isOnboarded: data.isOnboarded || true, // Set to true for quiz app users
+            isOnboarded: data.isOnboarded, // Use the actual value from backend
             userName: data.userName,
             occupation: data.occupation,
             purpose: data.purpose,
