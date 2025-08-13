@@ -34,7 +34,9 @@ This app follows modern Next.js patterns:
    ```
 
 2. **Environment Configuration**:
-   Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory with:
+   
+   - `NEXT_PUBLIC_GA_MEASUREMENT_ID` for GA4 tracking
 
 3. **Run the development server**:
    ```bash
