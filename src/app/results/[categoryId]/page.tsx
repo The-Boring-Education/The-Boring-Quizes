@@ -9,6 +9,7 @@ import { Question } from "@/types/quiz"
 import { ArrowLeft, Trophy, Clock, Target } from "lucide-react"
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { trackEvent } from "@/lib/analytics"
 
 interface QuizQuestion {
     _id?: string
@@ -56,6 +57,18 @@ function ResultsContent() {
             category: quizData?.data?.categoryName || "",
             difficulty: q.difficulty || "medium"
         })) || []
+
+    // Analytics: results view
+    useEffect(() => {
+        try {
+            trackEvent("quiz_results_view", {
+                category: "quiz",
+                categoryId,
+                timeTaken,
+                answeredCount: answers.filter((a) => a !== null).length
+            })
+        } catch {}
+    }, [categoryId, timeTaken, answers])
 
     // Calculate score
     const score = answers.reduce((acc: number, answer, index) => {

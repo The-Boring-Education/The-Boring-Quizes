@@ -6,6 +6,9 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from 'sonner'
 import './globals.css'
+import { useEffect } from 'react'
+import { initGA, installGlobalListeners, trackPageview } from '@/lib/analytics'
+import { usePathname, useSearchParams } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,6 +17,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    initGA()
+    installGlobalListeners()
+  }, [])
+
+  useEffect(() => {
+    if (!pathname) return
+    const url = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`
+    trackPageview(url)
+  }, [pathname, searchParams])
   return (
     <html lang="en">
       <head>
