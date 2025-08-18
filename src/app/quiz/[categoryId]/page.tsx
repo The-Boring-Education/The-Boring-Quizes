@@ -9,6 +9,7 @@ import { APIResponse, QuizQuestionsData, QuizQuestion } from "@/types/api"
 import { ArrowLeft, Clock, AlertTriangle, X } from "lucide-react"
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { trackEvent } from "@/lib/analytics"
 
 function QuizContent() {
     const params = useParams()
@@ -82,6 +83,14 @@ function QuizContent() {
     const confirmExit = () => {
         setIsActive(false)
         setShowExitConfirmation(false)
+        try {
+            trackEvent("quiz_exit", {
+                category: "quiz",
+                categoryId,
+                answered: answers.filter(a => a !== null).length,
+                total: questions.length
+            })
+        } catch {}
         router.push("/dashboard")
     }
 
@@ -98,6 +107,15 @@ function QuizContent() {
             newAnswers[currentQuestion] = answerIndex
             setAnswers(newAnswers)
 
+            try {
+                trackEvent("quiz_answer", {
+                    category: "quiz",
+                    categoryId,
+                    questionIndex: currentQuestion,
+                    answerIndex
+                })
+            } catch {}
+
             if (currentQuestion < questions.length - 1) {
                 setCurrentQuestion((prev) => prev + 1)
                 setTimeLeft(30) // Reset timer for next question
@@ -105,6 +123,14 @@ function QuizContent() {
                 // Quiz completed
                 setIsActive(false)
                 const timeTaken = Math.floor((Date.now() - startTime) / 1000)
+                try {
+                    trackEvent("quiz_complete", {
+                        category: "quiz",
+                        categoryId,
+                        timeTaken,
+                        totalQuestions: questions.length
+                    })
+                } catch {}
                 router.push(`/results/${categoryId}?answers=${JSON.stringify(newAnswers)}&timeTaken=${timeTaken}`)
             }
         },
