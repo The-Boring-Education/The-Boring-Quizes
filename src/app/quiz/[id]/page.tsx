@@ -83,14 +83,14 @@ function QuizContent() {
     const confirmExit = () => {
         setIsActive(false)
         setShowExitConfirmation(false)
-        try {
-            trackEvent("quiz_exit", {
-                category: "quiz",
-                categoryId,
-                answered: answers.filter(a => a !== null).length,
-                total: questions.length
-            })
-        } catch {}
+                    try {
+                trackEvent("quiz_exit", {
+                    category: "quiz",
+                    quizId: id,
+                    answered: answers.filter(a => a !== null).length,
+                    total: questions.length
+                })
+            } catch {}
         router.push("/dashboard")
     }
 
@@ -110,7 +110,7 @@ function QuizContent() {
             try {
                 trackEvent("quiz_answer", {
                     category: "quiz",
-                    categoryId,
+                    quizId: id,
                     questionIndex: currentQuestion,
                     answerIndex
                 })
@@ -161,7 +161,7 @@ function QuizContent() {
                         const timeTaken = Math.floor(
                             (Date.now() - startTime) / 1000
                         )
-                        router.push(`/results/${categoryId}?answers=${JSON.stringify(answers)}&timeTaken=${timeTaken}`)
+                        router.push(`/results/${id}?answers=${JSON.stringify(answers)}&timeTaken=${timeTaken}`)
                         return 0
                     }
                 }
@@ -178,7 +178,7 @@ function QuizContent() {
         answers,
         startTime,
         router,
-        categoryId
+        id
     ])
 
     if (isLoading) {
