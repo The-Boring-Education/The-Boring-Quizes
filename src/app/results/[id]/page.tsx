@@ -63,12 +63,12 @@ function ResultsContent() {
         try {
             trackEvent("quiz_results_view", {
                 category: "quiz",
-                categoryId,
+                quizId: id,
                 timeTaken,
                 answeredCount: answers.filter((a) => a !== null).length
             })
         } catch {}
-    }, [categoryId, timeTaken, answers])
+    }, [id, timeTaken, answers])
 
     // Calculate score
     const score = answers.reduce((acc: number, answer, index) => {
@@ -87,7 +87,7 @@ function ResultsContent() {
             if (
                 hasSubmittedRef.current ||
                 !user?.id ||
-                !categoryId ||
+                !id ||
                 answers.length === 0
             )
                 return
@@ -97,7 +97,7 @@ function ResultsContent() {
             try {
                 const answersArray = answers.map((answer) => answer ?? -1)
     
-                await quizApi.submitAttempt(categoryId, {
+                await quizApi.submitAttempt(id, {
                     userId: user.id,
                     answers: answersArray,
                     timeTaken
@@ -109,7 +109,7 @@ function ResultsContent() {
         }
     
         submitResults()
-    }, [user?.id, categoryId, answers, timeTaken])
+    }, [user?.id, id, answers, timeTaken])
 
     if (isLoading) {
         return (
@@ -199,7 +199,7 @@ function ResultsContent() {
                     {/* Action Buttons */}
                     <div className='flex flex-col sm:flex-row gap-4'>
                         <button
-                            onClick={() => router.push(`/quiz/${categoryId}`)}
+                            onClick={() => router.push(`/quiz/${id}`)}
                             className='flex-1 bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors'>
                             Try Again
                         </button>
