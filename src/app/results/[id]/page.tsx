@@ -27,7 +27,7 @@ function ResultsContent() {
     const searchParams = useSearchParams()
     const { user } = useAuth()
 
-    const categoryId = params.categoryId as string
+    const id = params.id as string
     const answersParam = searchParams.get('answers')
     const timeTakenParam = searchParams.get('timeTaken')
 
@@ -41,9 +41,9 @@ function ResultsContent() {
         isLoading,
         error
     } = useQuery({
-        queryKey: ["quiz", categoryId],
-        queryFn: () => quizApi.getQuestions(categoryId!),
-        enabled: !!categoryId
+        queryKey: ["quiz", id],
+        queryFn: () => quizApi.getQuestions(id!),
+        enabled: !!id
     })
 
     const questions: Question[] =

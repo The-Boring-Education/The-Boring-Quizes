@@ -1,6 +1,6 @@
 export interface QuizAttempt {
     _id: string
-    categoryId: string
+    quizId: string
     categoryName: string
     score: number
     correctAnswers: number
@@ -41,7 +41,6 @@ export interface LeaderboardEntry {
 
 export interface QuizCategoryAPI {
     _id: string
-    categoryId: string
     categoryName: string
     categoryDescription: string
     categoryIcon: string
@@ -72,7 +71,6 @@ export interface QuizQuestion {
 
 export interface QuizQuestionsData {
     _id: string
-    categoryId: string
     categoryName: string
     categoryDescription: string
     categoryIcon: string

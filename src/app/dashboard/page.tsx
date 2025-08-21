@@ -125,20 +125,24 @@ function DashboardContent() {
     }
 
     // Color mapping for different quiz categories
-    const getCategoryColor = (categoryId: string) => {
-        const colorMap: Record<string, string> = {
-            'javascript-quiz': 'from-yellow-500 to-orange-500',
-            'react-js-quiz': 'from-blue-500 to-cyan-500',
-            'python-quiz': 'from-green-500 to-emerald-500',
-            'web-dev-quiz': 'from-purple-500 to-pink-500',
-        }
-        return colorMap[categoryId] || 'from-gray-500 to-slate-500'
+    const getCategoryColor = (id: string) => {
+        // Use a hash of the ID to consistently assign colors
+        const colors = [
+            'from-yellow-500 to-orange-500',
+            'from-blue-500 to-cyan-500',
+            'from-green-500 to-emerald-500',
+            'from-purple-500 to-pink-500',
+            'from-red-500 to-rose-500',
+            'from-indigo-500 to-violet-500',
+        ]
+        const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        return colors[hash % colors.length]
     }
 
     // Get user's progress for each category
-    const getCategoryProgress = (categoryId: string) => {
+    const getCategoryProgress = (quizId: string) => {
         const categoryAttempts = attempts.filter((attempt: QuizAttempt) => 
-            attempt.categoryId === categoryId
+            attempt.quizId === quizId
         )
         
         if (categoryAttempts.length === 0) return null
@@ -157,12 +161,12 @@ function DashboardContent() {
     // Map API categories to QuizCategory format
     const transformedCategories: QuizCategory[] = categories.map(
         (cat: QuizCategoryAPI) => ({
-            id: cat.categoryId,
+            id: cat._id,
             name: cat.categoryName,
             description: cat.categoryDescription,
             icon: cat.categoryIcon,
             questions: [], // Will be loaded when category is selected
-            color: getCategoryColor(cat.categoryId)
+            color: getCategoryColor(cat._id)
         })
     )
 

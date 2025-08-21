@@ -14,7 +14,7 @@ import { trackEvent } from "@/lib/analytics"
 function QuizContent() {
     const params = useParams()
     const router = useRouter()
-    const categoryId = params.categoryId as string
+    const id = params.id as string
 
     const [currentQuestion, setCurrentQuestion] = useState(0)
     const [answers, setAnswers] = useState<(number | null)[]>([])
@@ -29,9 +29,9 @@ function QuizContent() {
         isLoading,
         error
     } = useQuery<APIResponse<QuizQuestionsData>>({
-        queryKey: ["quiz", categoryId],
-        queryFn: () => quizApi.getQuestions(categoryId!),
-        enabled: !!categoryId
+        queryKey: ["quiz", id],
+        queryFn: () => quizApi.getQuestions(id!),
+        enabled: !!id
     })
 
     const questions: Question[] = useMemo(() => {
@@ -126,12 +126,12 @@ function QuizContent() {
                 try {
                     trackEvent("quiz_complete", {
                         category: "quiz",
-                        categoryId,
+                        quizId: id,
                         timeTaken,
                         totalQuestions: questions.length
                     })
                 } catch {}
-                router.push(`/results/${categoryId}?answers=${JSON.stringify(newAnswers)}&timeTaken=${timeTaken}`)
+                router.push(`/results/${id}?answers=${JSON.stringify(newAnswers)}&timeTaken=${timeTaken}`)
             }
         },
         [
@@ -141,7 +141,7 @@ function QuizContent() {
             isActive,
             startTime,
             router,
-            categoryId
+            id
         ]
     )
 
