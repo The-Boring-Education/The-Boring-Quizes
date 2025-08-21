@@ -39,14 +39,14 @@ export interface QuizResult {
 export const quizApi = {
   // Get quiz categories
   getCategories: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz`)
+    const response = await fetch(`${API_BASE_URL}/quiz`)
     if (!response.ok) throw new Error('Failed to fetch quiz categories')
     return response.json()
   },
 
   // Get quiz questions for a category
   getQuestions: async (quizId: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/${quizId}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/${quizId}`)
     if (!response.ok) throw new Error('Failed to fetch quiz questions')
     return response.json()
   },
@@ -58,7 +58,7 @@ export const quizApi = {
     difficulty: 'easy' | 'medium' | 'hard' | 'mixed'
     questionCount: number
   }) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/session/start`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/session/start`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const quizApi = {
     answer: number
     timeSpent: number
   }) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/session/${sessionId}/answer`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/session/${sessionId}/answer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export const quizApi = {
 
   // Complete a quiz session
   completeSession: async (sessionId: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/session/${sessionId}/complete`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/session/${sessionId}/complete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export const quizApi = {
     const params = new URLSearchParams()
     if (categoryName) params.append('categoryName', categoryName)
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/analytics/${userId}?${params}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/analytics/${userId}?${params}`)
     if (!response.ok) throw new Error('Failed to fetch user analytics')
     return response.json()
   },
@@ -114,7 +114,7 @@ export const quizApi = {
     if (categoryName) params.append('categoryName', categoryName)
     params.append('limit', limit.toString())
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/leaderboard?${params}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/leaderboard?${params}`)
     if (!response.ok) throw new Error('Failed to fetch leaderboard')
     return response.json()
   },
@@ -124,7 +124,7 @@ export const quizApi = {
     const params = new URLSearchParams()
     if (status) params.append('status', status)
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/sessions/${userId}?${params}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/sessions/${userId}?${params}`)
     if (!response.ok) throw new Error('Failed to fetch user sessions')
     return response.json()
   }
