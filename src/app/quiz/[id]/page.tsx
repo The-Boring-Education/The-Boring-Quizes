@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -107,14 +107,9 @@ function QuizContent() {
       setStartTime(Date.now())
       setTimeSpent(0)
     }
-  }, [currentSession?.currentQuestionIndex])
+  }, [currentSession, currentSession?.currentQuestionIndex])
 
-  // Load quiz data
-  useEffect(() => {
-    fetchQuizData()
-  }, [id])
-
-  const fetchQuizData = async () => {
+  const fetchQuizData = useCallback(async () => {
     try {
       setLoading(true)
       const response = await quizApi.getQuestions(id)
@@ -135,7 +130,12 @@ function QuizContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  // Load quiz data
+  useEffect(() => {
+    fetchQuizData()
+  }, [fetchQuizData])
 
   const startQuizSession = async () => {
     try {
@@ -618,7 +618,7 @@ function QuizContent() {
                 <div className="mb-6">
                   <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Quiz Completed!</h2>
-                  <p className="text-gray-600">Great job! You've finished the quiz.</p>
+                  <p className="text-gray-600">Great job! You&apos;ve finished the quiz.</p>
                 </div>
                 
                 <div className="space-y-4">
