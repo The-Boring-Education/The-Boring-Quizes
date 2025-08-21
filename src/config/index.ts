@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
 
     // Quiz - Updated to match TBE webapp structure
     QUIZ_CATEGORIES: "/api/v1/quiz",
-    QUIZ_QUESTIONS: (categoryId: string) => `/api/v1/quiz/${categoryId}`,
+    QUIZ_QUESTIONS: (id: string) => `/api/v1/quiz/${id}`,
     QUIZ_SUBMIT: "/api/v1/quiz/submit",
     QUIZ_HISTORY: "/api/v1/quiz/history",
     QUIZ_ATTEMPTS: "/api/v1/quiz/attempts",

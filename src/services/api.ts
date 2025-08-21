@@ -93,9 +93,9 @@ export const quizApi = {
         }
     },
 
-    getQuestions: async (categoryId: string): Promise<APIResponse<QuizQuestionsData>> => {
+    getQuestions: async (id: string): Promise<APIResponse<QuizQuestionsData>> => {
         try {
-            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
+            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(id))
         } catch (error) {
             console.error("Error fetching quiz questions:", error)
             throw error
@@ -103,7 +103,7 @@ export const quizApi = {
     },
 
     submitAttempt: async (
-        categoryId: string, 
+        id: string, 
         data: {
             userId: string
             answers: number[]
@@ -112,7 +112,7 @@ export const quizApi = {
     ) => {
         try {
             return await apiClient.post(
-                `${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, 
+                `${API_ENDPOINTS.QUIZ_QUESTIONS(id)}/attempt`, 
                 data
             )
         } catch (error) {
