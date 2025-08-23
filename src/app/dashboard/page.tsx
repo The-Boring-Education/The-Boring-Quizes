@@ -9,6 +9,7 @@ import { QuizCategory } from "@/types/quiz"
 import { QuizCategoryAPI, APIResponse, QuizAttempt } from "@/types/api"
 import { User, LogOut, Brain, Trophy, Clock, Target, Menu, X, ChevronDown, Play, ArrowRight, CheckCircle, BookOpen, Zap } from "lucide-react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { DashboardNav } from "@/components/layout/DashboardNav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,11 +25,9 @@ const ComponentLoader = () => (
 )
 
 function DashboardContent() {
-    const { user, signOut } = useAuth()
+    const { user } = useAuth()
     const router = useRouter()
     const { toast } = useToast()
-    const [showUserMenu, setShowUserMenu] = useState(false)
-    const [loading, setLoading] = useState(false)
 
     const {
         data: categoriesData,
@@ -98,22 +97,6 @@ function DashboardContent() {
         router.push(`/quiz/${category.id}`)
     }
 
-    const handleSignOut = async () => {
-        try {
-            setLoading(true)
-            await signOut()
-            // AuthContext already handles the redirect
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to sign out. Please try again.",
-                variant: "destructive",
-            })
-        } finally {
-            setLoading(false)
-        }
-    }
-
     // Get user initials for avatar fallback
     const getInitials = (name: string) => {
         return name
@@ -172,58 +155,7 @@ function DashboardContent() {
 
     return (
         <div className='min-h-screen bg-background'>
-            {/* Header */}
-            <header className='glass border-b'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-                    <div className='flex justify-between items-center h-16'>
-                        <div className='flex items-center animate-fade-in'>
-                            <div className='w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3'>
-                                <Brain className='w-5 h-5 text-primary-foreground' />
-                            </div>
-                            <h1 className='text-2xl font-bold text-foreground'>
-                                The Boring Quizes
-                            </h1>
-                        </div>
-
-                        {/* User Menu */}
-                        <div className='relative'>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowUserMenu(!showUserMenu)}
-                                className='flex items-center space-x-3 h-10'
-                                disabled={loading}
-                            >
-                                <Avatar className="h-6 w-6">
-                                    <AvatarImage src={user?.image} alt={user?.name} />
-                                    <AvatarFallback className="text-xs">
-                                        {user?.name ? getInitials(user.name) : "U"}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className='font-medium'>
-                                    {user?.name}
-                                </span>
-                                <ChevronDown className="h-4 w-4" />
-                            </Button>
-
-                            {showUserMenu && (
-                                <div className='absolute right-0 mt-2 w-48 glass-dark rounded-lg shadow-lg border z-50'>
-                                    <div className='py-2'>
-                                        <Button
-                                            variant="ghost"
-                                            onClick={handleSignOut}
-                                            disabled={loading}
-                                            className='w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-400/10'
-                                        >
-                                            <LogOut className='w-4 h-4 mr-2' />
-                                            {loading ? "Signing out..." : "Sign Out"}
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <DashboardNav />
 
             {/* Main Content */}
             <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>

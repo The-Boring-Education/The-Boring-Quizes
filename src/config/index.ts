@@ -19,8 +19,15 @@ export const API_ENDPOINTS = {
     // User
     USER_CREATE: "/api/v1/user",
     USER_ONBOARDING: "/api/v1/user/onboarding",
+    USER_PROFILE: "/api/v1/user/profile",
+
+    // Analytics & Performance
+    ANALYTICS_PERFORMANCE: "/api/v1/analytics/performance",
+    ANALYTICS_CATEGORY_PERFORMANCE: "/api/v1/analytics/category-performance",
+    ANALYTICS_HISTORY: "/api/v1/analytics/history",
 
     // Gamification
     USER_POINTS: "/api/v1/gamification/points",
-    LEADERBOARD: "/api/v1/gamification/leaderboard"
+    LEADERBOARD: "/api/v1/gamification/leaderboard",
+    USER_RANK: "/api/v1/gamification/user-rank"
 }

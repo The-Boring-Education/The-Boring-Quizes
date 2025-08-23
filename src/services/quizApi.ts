@@ -55,8 +55,8 @@ export const quizApi = {
   startSession: async (payload: {
     userId: string
     quizId: string
-    difficulty: 'easy' | 'medium' | 'hard' | 'mixed'
-    questionCount: number
+    difficulty?: 'easy' | 'medium' | 'hard' | 'mixed'
+    questionCount?: number
   }) => {
     const response = await fetch(`${API_BASE_URL}/quiz/session/start`, {
       method: 'POST',
