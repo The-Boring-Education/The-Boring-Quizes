@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 import { quizApi } from "@/services/quizApi"
 import { 
   Clock, 
@@ -65,6 +66,7 @@ interface QuizResult {
 function QuizContent() {
   const params = useParams()
   const router = useRouter()
+  const { user } = useAuth()
   const id = params.id as string
 
   const [gameState, setGameState] = useState<'setup' | 'playing' | 'completed'>('setup')
@@ -78,9 +80,8 @@ function QuizContent() {
   const [quizData, setQuizData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  // Configuration state
-  const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('medium')
-  const [questionCount, setQuestionCount] = useState(10)
+  // Configuration state - using defaults
+  const defaultQuestionCount = 10
 
   // Enhanced features state
   const [activeTab, setActiveTab] = useState<'quiz' | 'analytics' | 'history' | 'leaderboard'>('quiz')
@@ -139,13 +140,14 @@ function QuizContent() {
 
   const startQuizSession = async () => {
     try {
-      const userId = localStorage.getItem('userId') || 'demo-user'
+      if (!user?.id) {
+        alert('Please log in to start a quiz session')
+        return
+      }
       
       const response = await quizApi.startSession({
-        userId,
-        quizId: id,
-        difficulty: selectedDifficulty,
-        questionCount
+        userId: user.id,
+        quizId: id
       })
       
       if (response.success) {
@@ -230,8 +232,11 @@ function QuizContent() {
   const fetchUserAnalytics = async () => {
     try {
       setAnalyticsLoading(true)
-      const userId = localStorage.getItem('userId') || 'demo-user'
-      const response = await quizApi.getUserAnalytics(userId, quizData?.categoryName)
+      if (!user?.id) {
+        console.warn('No user ID available for analytics')
+        return
+      }
+      const response = await quizApi.getUserAnalytics(user.id, quizData?.categoryName)
       if (response.success) {
         setUserAnalytics(response.data)
       }
@@ -257,8 +262,11 @@ function QuizContent() {
 
   const fetchQuizHistory = async () => {
     try {
-      const userId = localStorage.getItem('userId') || 'demo-user'
-      const response = await quizApi.getUserSessions(userId, 'completed')
+      if (!user?.id) {
+        console.warn('No user ID available for quiz history')
+        return
+      }
+      const response = await quizApi.getUserSessions(user.id, 'completed')
       if (response.success) {
         setQuizHistory(response.data)
       }
@@ -373,63 +381,27 @@ function QuizContent() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Target className="h-5 w-5" />
-                  <span>Configure Your Quiz</span>
+                  <span>Start Your Quiz</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">
-                    Choose Difficulty Level
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(['easy', 'medium', 'hard', 'mixed'] as const).map((difficulty) => (
-                      <Button
-                        key={difficulty}
-                        variant={selectedDifficulty === difficulty ? "default" : "outline"}
-                        onClick={() => setSelectedDifficulty(difficulty)}
-                        className={`h-12 ${selectedDifficulty === difficulty ? getDifficultyColor(difficulty) : ''}`}
-                      >
-                        {getDifficultyIcon(difficulty)}
-                        <span className="ml-2 capitalize">{difficulty}</span>
-                      </Button>
-                    ))}
+                <div className="text-center space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to start your quiz?</h3>
+                    <p className="text-gray-600">
+                      You'll get {defaultQuestionCount} questions with mixed difficulty levels to test your knowledge.
+                    </p>
                   </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">
-                    Number of Questions: {questionCount}
-                  </label>
-                  <div className="flex items-center space-x-4">
+                  
+                  <div className="flex justify-center pt-4">
                     <Button
-                      variant="outline"
-                      onClick={() => setQuestionCount(Math.max(5, questionCount - 5))}
-                      disabled={questionCount <= 5}
+                      onClick={startQuizSession}
+                      size="lg"
+                      className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                     >
-                      -5
-                    </Button>
-                    <div className="flex-1 text-center">
-                      <div className="text-2xl font-bold">{questionCount}</div>
-                      <div className="text-sm text-gray-500">questions</div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setQuestionCount(Math.min(30, questionCount + 5))}
-                      disabled={questionCount >= 30}
-                    >
-                      +5
+                      Start Quiz ({defaultQuestionCount} questions)
                     </Button>
                   </div>
-                </div>
-                
-                <div className="flex justify-center pt-4">
-                  <Button
-                    onClick={startQuizSession}
-                    size="lg"
-                    className="px-8 py-3 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                  >
-                    Start Quiz ({questionCount} questions)
-                  </Button>
                 </div>
               </CardContent>
             </Card>

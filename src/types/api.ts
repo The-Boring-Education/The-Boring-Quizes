@@ -76,3 +76,69 @@ export interface QuizQuestionsData {
     categoryIcon: string
     questions: QuizQuestion[]
 }
+
+// Enhanced Analytics Types
+export interface PerformanceMetrics {
+    totalAttempts: number
+    totalScore: number
+    averageScore: number
+    bestScore: number
+    totalTimeSpent: number
+    averageTimePerQuiz: number
+    accuracyRate: number
+    improvementRate: number
+    streakDays: number
+    lastActiveDate: string
+}
+
+export interface CategoryPerformance {
+    categoryId: string
+    categoryName: string
+    attempts: number
+    bestScore: number
+    averageScore: number
+    totalTimeSpent: number
+    lastAttemptDate: string
+    improvementTrend: 'improving' | 'declining' | 'stable'
+}
+
+export interface PerformanceHistory {
+    date: string
+    score: number
+    timeTaken: number
+    categoryName: string
+    quizId: string
+}
+
+export interface LeaderboardData {
+    rank: number
+    userId: string
+    userName: string
+    userImage?: string
+    totalPoints: number
+    totalQuizzes: number
+    averageScore: number
+    streakDays: number
+    achievements: string[]
+}
+
+export interface Achievement {
+    id: string
+    name: string
+    description: string
+    icon: string
+    unlockedAt: string
+    points: number
+}
+
+export interface UserProfile {
+    userId: string
+    userName: string
+    userEmail: string
+    userImage?: string
+    totalPoints: number
+    rank: number
+    achievements: Achievement[]
+    joinDate: string
+    lastActiveDate: string
+}
