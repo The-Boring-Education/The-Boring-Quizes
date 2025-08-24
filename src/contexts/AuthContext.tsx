@@ -26,12 +26,14 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     // Check authentication status on mount
     const checkAuth = async () => {
         try {
+            console.log("checkAuth: Starting authentication check")
             setLoading(true)
             
             if (typeof window !== 'undefined') {
                 const storedUser = localStorage.getItem("quizUser")
+                console.log("checkAuth: Stored user from localStorage:", storedUser ? "exists" : "null")
+                
                 if (storedUser) {
-
                     const userData = JSON.parse(storedUser)
                     // Use the actual isOnboarded value from stored data
                     console.log("checkAuth: Setting user from localStorage:", userData)
@@ -39,14 +41,17 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                     
                     // Verify user still exists in backend
                     try {
+                        console.log("checkAuth: Verifying user with backend...")
                         const response = await userApi.getUserByEmail(userData.email) as any
                         if (!response?.data?.data) {
                             // User doesn't exist in backend, clear local data
+                            console.log("checkAuth: User not found in backend, clearing local data")
                             localStorage.removeItem("quizUser")
                             localStorage.removeItem("quizToken")
                             setUser(null)
                         } else {
                             // Update user data from backend to ensure it's current
+                            console.log("checkAuth: User verified in backend, updating data")
                             const backendUserData = response.data.data
                             const updatedUser: User = {
                                 id: backendUserData._id,
@@ -65,6 +70,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                         // If verification fails, keep user logged in locally
                         console.warn("Could not verify user with backend:", error)
                     }
+                } else {
+                    console.log("checkAuth: No stored user found")
                 }
             }
         } catch (error) {
@@ -75,6 +82,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             }
             setUser(null)
         } finally {
+            // Always set loading to false after auth check is complete
+            console.log("checkAuth: Setting loading to false")
             setLoading(false)
         }
     }

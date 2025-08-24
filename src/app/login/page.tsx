@@ -19,7 +19,7 @@ export default function Login() {
             console.log("User found in login page:", user)
             if (user.isOnboarded) {
                 console.log("User is onboarded, redirecting to dashboard")
-                router.push("/dashboard")
+                router.push("/dashboard/simple")
             } else {
                 console.log("User not onboarded, redirecting to onboarding")
                 const params = new URLSearchParams({

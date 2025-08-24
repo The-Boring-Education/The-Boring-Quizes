@@ -136,7 +136,7 @@ function ResultsContent() {
                 <div className='max-w-4xl mx-auto px-4 py-4'>
                     <div className='flex items-center justify-between'>
                         <button
-                            onClick={() => router.push("/dashboard")}
+                            onClick={() => router.push("/dashboard/simple")}
                             className='flex items-center space-x-2 text-gray-600 hover:text-gray-900'>
                             <ArrowLeft className='w-5 h-5' />
                             <span>Back to Dashboard</span>
@@ -204,7 +204,7 @@ function ResultsContent() {
                             Try Again
                         </button>
                         <button
-                            onClick={() => router.push("/dashboard")}
+                            onClick={() => router.push("/dashboard/simple")}
                             className='flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors'>
                             Back to Dashboard
                         </button>
