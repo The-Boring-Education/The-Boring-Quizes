@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
 import { simpleQuizApi, LeaderboardEntry } from "@/services/simpleQuizApi"
 import { 
-  ArrowLeft, 
   Trophy, 
   Medal,
   Award,
@@ -89,47 +89,39 @@ function LeaderboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading leaderboard...</p>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-lg text-gray-600">Loading leaderboard...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={loadLeaderboard}>Try Again</Button>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={loadLeaderboard}>Try Again</Button>
+          </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/dashboard/simple')}
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Dashboard</span>
-          </Button>
-          
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Leaderboard</h1>
-            <p className="text-gray-600">See who's leading the pack</p>
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">🏆 Leaderboard</h1>
+            <p className="text-xl text-gray-600">See who's leading the pack in our quiz community</p>
           </div>
-          
-          <div className="w-32"></div>
-        </div>
 
         <div className="max-w-4xl mx-auto">
           {/* Current User Position */}
@@ -254,17 +246,26 @@ function LeaderboardContent() {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex justify-center space-x-4 mt-8">
-            <Button onClick={() => router.push('/dashboard/simple')}>
+          <div className="flex justify-center space-x-4 mt-12">
+            <Button 
+              onClick={() => router.push('/dashboard')}
+              className="bg-indigo-600 hover:bg-indigo-700"
+              size="lg"
+            >
               Take a Quiz
             </Button>
-            <Button variant="outline" onClick={() => router.push('/performance')}>
+            <Button 
+              variant="outline" 
+              onClick={() => router.push('/performance')}
+              className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+              size="lg"
+            >
               View Your Performance
             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }
 
