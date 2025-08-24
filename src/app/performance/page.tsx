@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
-import { quizApi, APIError } from "@/services/api"
+import { analyticsApi, APIError } from "@/services/api"
 import { 
   BarChart3, 
   Trophy, 
@@ -18,24 +18,15 @@ import {
 
 interface UserPerformance {
   totalAttempts: number
-  totalQuizzes: number
+  totalScore: number
   averageScore: number
   bestScore: number
   totalTimeSpent: number
-  categoryBreakdown: {
-    categoryName: string
-    attempts: number
-    averageScore: number
-    bestScore: number
-  }[]
-  recentAttempts: {
-    _id: string
-    quizId: string
-    categoryName: string
-    score: number
-    completedAt: string
-    totalTimeSpent: number
-  }[]
+  averageTimePerQuiz: number
+  accuracyRate: number
+  improvementRate: number
+  streakDays: number
+  lastActiveDate: string
 }
 
 function PerformanceContent() {
@@ -58,7 +49,7 @@ function PerformanceContent() {
       setLoading(true)
       setError(null)
       
-      const response = await quizApi.getUserPerformance(user.id)
+      const response = await analyticsApi.getPerformanceMetrics(user.id)
       
       if (response.success) {
         setPerformance(response.data)
@@ -83,13 +74,7 @@ function PerformanceContent() {
     return `${minutes}m`
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-  }
+
 
   if (loading) {
     return (
@@ -144,7 +129,7 @@ function PerformanceContent() {
 
         <div className="max-w-6xl mx-auto">
           {/* Overall Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -190,6 +175,20 @@ function PerformanceContent() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Accuracy Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">{performance.accuracyRate}%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <Clock className="h-6 w-6 text-purple-600" />
                   </div>
@@ -204,93 +203,59 @@ function PerformanceContent() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Category Performance */}
+          {/* Additional Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <TrendingUp className="h-5 w-5" />
-                  <span>Performance by Category</span>
+                  <span>Improvement Rate</span>
                 </CardTitle>
                 <CardDescription>
-                  See how you're performing across different quiz categories
+                  Your learning progress over time
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {performance.categoryBreakdown.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">
-                    No category data available yet
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {performance.categoryBreakdown.map((category, index) => (
-                      <div key={index} className="border-b border-gray-100 pb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-900">{category.categoryName}</h4>
-                          <span className="text-sm font-semibold text-blue-600">
-                            {category.averageScore}%
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-gray-600">
-                          <span>{category.attempts} attempts</span>
-                          <span>Best: {category.bestScore}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${category.averageScore}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-green-600">{performance.improvementRate}%</p>
+                  <p className="text-sm text-gray-600 mt-2">Improvement rate</p>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Recent Activity */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Calendar className="h-5 w-5" />
-                  <span>Recent Activity</span>
+                  <span>Streak Days</span>
                 </CardTitle>
                 <CardDescription>
-                  Your latest quiz attempts
+                  Consecutive days of activity
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {performance.recentAttempts.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">
-                    No recent activity
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {performance.recentAttempts.map((attempt, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 text-sm">
-                            {attempt.categoryName}
-                          </h4>
-                          <p className="text-xs text-gray-600">
-                            {formatDate(attempt.completedAt)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-lg font-bold ${
-                            attempt.score >= 80 ? 'text-green-600' :
-                            attempt.score >= 60 ? 'text-yellow-600' : 'text-red-600'
-                          }`}>
-                            {attempt.score}%
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {formatTime(attempt.totalTimeSpent)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-orange-600">{performance.streakDays}</p>
+                  <p className="text-sm text-gray-600 mt-2">Days in a row</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5" />
+                  <span>Average Time</span>
+                </CardTitle>
+                <CardDescription>
+                  Time per quiz on average
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-blue-600">{formatTime(performance.averageTimePerQuiz)}</p>
+                  <p className="text-sm text-gray-600 mt-2">Per quiz</p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -313,6 +278,7 @@ function PerformanceContent() {
               View Leaderboard
             </Button>
           </div>
+        </div>
         </div>
       </div>
     </Layout>
