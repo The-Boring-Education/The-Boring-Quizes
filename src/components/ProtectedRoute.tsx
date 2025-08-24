@@ -102,17 +102,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         refreshUserFromBackend
     ])
 
-    // Show loading state while any of these are happening
-    if (loading || refreshingUser || redirectingToOnboarding) {
-        return (
-            <div className='min-h-screen flex items-center justify-center'>
-                <div className='text-2xl font-semibold'>
-                    {redirectingToOnboarding ? 'Redirecting to onboarding...' : 'Loading...'}
-                </div>
-            </div>
-        )
-    }
-
     // Handle redirect to login in useEffect to avoid render-time redirects
     useEffect(() => {
         console.log("ProtectedRoute useEffect - loading:", loading, "user:", user ? "exists" : "null")
@@ -127,6 +116,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         
         return () => clearTimeout(timer)
     }, [loading, user, router])
+
+    // Show loading state while any of these are happening
+    if (loading || refreshingUser || redirectingToOnboarding) {
+        return (
+            <div className='min-h-screen flex items-center justify-center'>
+                <div className='text-2xl font-semibold'>
+                    {redirectingToOnboarding ? 'Redirecting to onboarding...' : 'Loading...'}
+                </div>
+            </div>
+        )
+    }
 
     // If still loading, show loading state
     if (loading) {

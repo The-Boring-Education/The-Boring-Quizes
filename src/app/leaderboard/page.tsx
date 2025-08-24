@@ -142,7 +142,7 @@ function LeaderboardContent() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">🏆 Leaderboard</h1>
-            <p className="text-xl text-gray-600">See who's leading the pack in our quiz community</p>
+            <p className="text-xl text-gray-600">See who&apos;s leading the pack in our quiz community</p>
           </div>
 
           <div className="max-w-4xl mx-auto">
