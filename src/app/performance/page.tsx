@@ -4,10 +4,9 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
-import { simpleQuizApi, UserPerformance } from "@/services/simpleQuizApi"
+import { quizApi, APIError } from "@/services/api"
 import { 
   BarChart3, 
   Trophy, 
@@ -16,6 +15,28 @@ import {
   TrendingUp,
   Calendar
 } from "lucide-react"
+
+interface UserPerformance {
+  totalAttempts: number
+  totalQuizzes: number
+  averageScore: number
+  bestScore: number
+  totalTimeSpent: number
+  categoryBreakdown: {
+    categoryName: string
+    attempts: number
+    averageScore: number
+    bestScore: number
+  }[]
+  recentAttempts: {
+    _id: string
+    quizId: string
+    categoryName: string
+    score: number
+    completedAt: string
+    totalTimeSpent: number
+  }[]
+}
 
 function PerformanceContent() {
   const { user } = useAuth()
@@ -36,15 +57,18 @@ function PerformanceContent() {
     try {
       setLoading(true)
       setError(null)
-      const response = await simpleQuizApi.getUserPerformance(user.id)
+      
+      const response = await quizApi.getUserPerformance(user.id)
+      
       if (response.success) {
         setPerformance(response.data)
       } else {
-        throw new Error(response.error || 'Failed to load performance')
+        throw new APIError(response.message || 'Failed to load performance', 500)
       }
     } catch (err) {
       console.error('Error loading performance:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load performance')
+      const errorMessage = err instanceof APIError ? err.message : 'Failed to load performance'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -296,9 +320,5 @@ function PerformanceContent() {
 }
 
 export default function Performance() {
-  return (
-    <ProtectedRoute>
-      <PerformanceContent />
-    </ProtectedRoute>
-  )
+  return <PerformanceContent />
 }

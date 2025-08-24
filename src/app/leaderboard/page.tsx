@@ -4,10 +4,9 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
-import { simpleQuizApi, LeaderboardEntry } from "@/services/simpleQuizApi"
+import { quizApi, APIError } from "@/services/api"
 import { 
   Trophy, 
   Medal,
@@ -17,6 +16,16 @@ import {
   Target,
   Clock
 } from "lucide-react"
+
+interface LeaderboardEntry {
+  userId: string
+  username: string
+  averageScore: number
+  totalAttempts: number
+  bestScore: number
+  totalTimeSpent: number
+  rank: number
+}
 
 function LeaderboardContent() {
   const { user } = useAuth()
@@ -33,15 +42,18 @@ function LeaderboardContent() {
     try {
       setLoading(true)
       setError(null)
-      const response = await simpleQuizApi.getLeaderboard()
+      
+      const response = await quizApi.getLeaderboard()
+      
       if (response.success) {
         setLeaderboard(response.data)
       } else {
-        throw new Error(response.error || 'Failed to load leaderboard')
+        throw new APIError(response.message || 'Failed to load leaderboard', 500)
       }
     } catch (err) {
       console.error('Error loading leaderboard:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load leaderboard')
+      const errorMessage = err instanceof APIError ? err.message : 'Failed to load leaderboard'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -270,9 +282,5 @@ function LeaderboardContent() {
 }
 
 export default function Leaderboard() {
-  return (
-    <ProtectedRoute>
-      <LeaderboardContent />
-    </ProtectedRoute>
-  )
+  return <LeaderboardContent />
 }

@@ -12,7 +12,9 @@ export const API_ENDPOINTS = {
     // Quiz - Updated to match TBE webapp structure
     QUIZ_CATEGORIES: "/quiz",
     QUIZ_QUESTIONS: (id: string) => `/quiz/${id}`,
-    QUIZ_SUBMIT: "/quiz/submit",
+    QUIZ_SUBMIT: (id: string) => `/quiz/${id}/submit`,
+    QUIZ_PERFORMANCE: (userId: string) => `/quiz/performance/${userId}`,
+    QUIZ_LEADERBOARD: "/quiz/leaderboard",
     QUIZ_HISTORY: "/quiz/history",
     QUIZ_ATTEMPTS: "/quiz/attempts",
 

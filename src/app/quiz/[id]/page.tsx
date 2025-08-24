@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
+import { quizApi, APIError } from "@/services/api"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
 
 interface QuizQuestion {
@@ -54,17 +54,18 @@ function QuizContent() {
 
   const loadQuiz = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL}/quiz/${quizId}`)
-      const data = await response.json()
-      if (data.success) {
-        setQuiz(data.data)
+      const response = await quizApi.getQuestions(quizId)
+      
+      if (response.success) {
+        setQuiz(response.data)
         setGameState('playing')
       } else {
-        throw new Error(data.error || 'Failed to load quiz')
+        throw new APIError(response.message || 'Failed to load quiz', 500)
       }
     } catch (error) {
       console.error('Error loading quiz:', error)
-      alert('Failed to load quiz. Please try again.')
+      const errorMessage = error instanceof APIError ? error.message : 'Failed to load quiz'
+      alert(`${errorMessage}. Please try again.`)
       router.back()
     }
   }
@@ -123,21 +124,13 @@ function QuizContent() {
         totalTimeSpent
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL}/quiz/${quizId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submission),
-      })
+      const response = await quizApi.submitQuiz(quizId, submission)
       
-      const data = await response.json()
-      
-      if (data.success) {
-        setResult(data.data)
+      if (response.success) {
+        setResult(response.data)
         setGameState('completed')
       } else {
-        throw new Error(data.error || 'Failed to submit quiz')
+        throw new APIError(response.message || 'Failed to submit quiz', 500)
       }
     } catch (error) {
       console.error('Error submitting quiz:', error)
@@ -378,9 +371,5 @@ function QuizContent() {
 }
 
 export default function QuizPage() {
-  return (
-    <ProtectedRoute>
-      <QuizContent />
-    </ProtectedRoute>
-  )
+  return <QuizContent />
 }
