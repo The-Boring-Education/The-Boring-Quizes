@@ -1,4 +1,5 @@
 import { config, API_ENDPOINTS } from '@/config'
+import { APIClient } from '@/services/base'
 
 // Debug utility to check API URL construction
 export function debugAPIUrls() {
@@ -24,4 +25,24 @@ export function debugAPIUrls() {
   console.log('Leaderboard: http://localhost:3000/api/v1/quiz/leaderboard')
   console.log('User Create: http://localhost:3000/api/v1/user')
   console.log('User Onboarding: http://localhost:3000/api/v1/user/onboarding')
+}
+
+// Test the APIClient URL construction
+export function testAPIClientUrls() {
+  console.log('🧪 Testing APIClient URL Construction:')
+  
+  const apiClient = new APIClient()
+  
+  // Test user endpoints
+  console.log('User Create:', apiClient['buildURL']('/user'))
+  console.log('User Onboarding:', apiClient['buildURL']('/user/onboarding'))
+  console.log('User Profile:', apiClient['buildURL']('/user/profile'))
+  
+  // Test quiz endpoints
+  console.log('Quiz Categories:', apiClient['buildURL']('/quiz'))
+  console.log('Quiz Questions:', apiClient['buildURL']('/quiz/test-id'))
+  console.log('Quiz Submit:', apiClient['buildURL']('/quiz/test-id/submit'))
+  
+  console.log('')
+  console.log('🔧 Base URL being used:', apiClient['baseURL'])
 }
