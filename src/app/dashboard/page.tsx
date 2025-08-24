@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
 import { useQuizData } from "@/hooks/useQuizData"
@@ -121,9 +120,5 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <ProtectedRoute>
-      <DashboardContent />
-    </ProtectedRoute>
-  )
+  return <DashboardContent />
 }
