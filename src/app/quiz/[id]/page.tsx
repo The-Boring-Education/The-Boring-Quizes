@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
-import { quizApi, APIError } from "@/services/api"
+import { quizApi } from "@/services/quizApi"
+import { quizApi as mainQuizApi } from "@/services/api"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
 
 interface QuizQuestion {
@@ -60,11 +61,11 @@ function QuizContent() {
         setQuiz(response.data)
         setGameState('playing')
       } else {
-        throw new APIError(response.message || 'Failed to load quiz', 500)
+        throw new Error(response.message || 'Failed to load quiz')
       }
     } catch (error) {
       console.error('Error loading quiz:', error)
-      const errorMessage = error instanceof APIError ? error.message : 'Failed to load quiz'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load quiz'
       alert(`${errorMessage}. Please try again.`)
       router.back()
     }
@@ -124,13 +125,17 @@ function QuizContent() {
         totalTimeSpent
       }
 
-      const response = await quizApi.submitQuiz(quizId, submission)
+      const response = await mainQuizApi.submitQuiz(quizId, submission)
       
-      if (response.success) {
+      // Type guard to check if response has the expected structure
+      if (response && typeof response === 'object' && 'success' in response && response.success && 'data' in response) {
         setResult(response.data)
         setGameState('completed')
       } else {
-        throw new APIError(response.message || 'Failed to submit quiz', 500)
+        const message = response && typeof response === 'object' && 'message' in response && typeof response.message === 'string' 
+          ? response.message 
+          : 'Failed to submit quiz'
+        throw new Error(message)
       }
     } catch (error) {
       console.error('Error submitting quiz:', error)
