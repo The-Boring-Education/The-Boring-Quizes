@@ -181,13 +181,11 @@ export const quizApi = {
     }
 }
 
-// Analytics & Performance APIs
+// Analytics & Performance APIs (using quiz endpoints)
 export const analyticsApi = {
     getPerformanceMetrics: async (userId: string): Promise<APIResponse<PerformanceMetrics>> => {
         try {
-            return await apiClient.get<APIResponse<PerformanceMetrics>>(API_ENDPOINTS.ANALYTICS_PERFORMANCE, {
-                params: { userId }
-            })
+            return await apiClient.get<APIResponse<PerformanceMetrics>>(API_ENDPOINTS.QUIZ_PERFORMANCE(userId))
         } catch (error) {
             console.error("Error fetching performance metrics:", error)
             throw error
@@ -196,9 +194,7 @@ export const analyticsApi = {
 
     getCategoryPerformance: async (userId: string): Promise<APIResponse<CategoryPerformance[]>> => {
         try {
-            return await apiClient.get<APIResponse<CategoryPerformance[]>>(API_ENDPOINTS.ANALYTICS_CATEGORY_PERFORMANCE, {
-                params: { userId }
-            })
+            return await apiClient.get<APIResponse<CategoryPerformance[]>>(API_ENDPOINTS.QUIZ_ANALYTICS(userId))
         } catch (error) {
             console.error("Error fetching category performance:", error)
             throw error
@@ -207,8 +203,8 @@ export const analyticsApi = {
 
     getPerformanceHistory: async (userId: string, days: number = 30): Promise<APIResponse<PerformanceHistory[]>> => {
         try {
-            return await apiClient.get<APIResponse<PerformanceHistory[]>>(API_ENDPOINTS.ANALYTICS_HISTORY, {
-                params: { userId, days: days.toString() }
+            return await apiClient.get<APIResponse<PerformanceHistory[]>>(API_ENDPOINTS.QUIZ_ANALYTICS(userId), {
+                params: { days: days.toString() }
             })
         } catch (error) {
             console.error("Error fetching performance history:", error)
@@ -217,11 +213,11 @@ export const analyticsApi = {
     }
 }
 
-// Leaderboard APIs
+// Leaderboard APIs (using quiz endpoints)
 export const leaderboardApi = {
     getLeaderboard: async (limit: number = 50): Promise<APIResponse<LeaderboardData[]>> => {
         try {
-            return await apiClient.get<APIResponse<LeaderboardData[]>>(API_ENDPOINTS.LEADERBOARD, {
+            return await apiClient.get<APIResponse<LeaderboardData[]>>(API_ENDPOINTS.QUIZ_LEADERBOARD, {
                 params: { limit: limit.toString() }
             })
         } catch (error) {
@@ -232,7 +228,7 @@ export const leaderboardApi = {
 
     getUserRank: async (userId: string): Promise<APIResponse<{ rank: number }>> => {
         try {
-            return await apiClient.get<APIResponse<{ rank: number }>>(API_ENDPOINTS.USER_RANK, {
+            return await apiClient.get<APIResponse<{ rank: number }>>(API_ENDPOINTS.GAMIFICATION_LEADERBOARD, {
                 params: { userId }
             })
         } catch (error) {
