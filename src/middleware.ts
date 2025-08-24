@@ -4,39 +4,19 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Routes that require authentication
-  const protectedRoutes = ['/dashboard', '/performance', '/leaderboard', '/quiz']
-  const publicRoutes = ['/login', '/']
-
-  // Check if the current path requires protection
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const isPublicRoute = publicRoutes.includes(pathname)
-
-  // Get user data from cookies or headers (you might need to adjust this based on your auth implementation)
-  const userCookie = request.cookies.get('quizUser')?.value
+  // For now, let the client-side AuthContext handle all auth logic
+  // since it uses localStorage which is not accessible in middleware
   
-  let user = null
-  try {
-    user = userCookie ? JSON.parse(userCookie) : null
-  } catch {
-    // Invalid user cookie, treat as not authenticated
+  // Only handle basic routing for static assets and API routes
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/') ||
+    pathname.includes('.') // static files
+  ) {
+    return NextResponse.next()
   }
 
-  // If accessing a protected route without authentication
-  if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // If accessing login page while already authenticated
-  if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  // If accessing root while authenticated, redirect to dashboard
-  if (pathname === '/' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
+  // Let all other routes pass through - AuthContext will handle auth
   return NextResponse.next()
 }
 

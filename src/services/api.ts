@@ -104,7 +104,7 @@ export const quizApi = {
         }
     },
 
-    // Submit completed quiz with all answers (simplified)
+    // Submit completed quiz with all answers (matching TBE webapp format)
     submitQuiz: async (
         id: string, 
         data: {

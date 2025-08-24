@@ -1,17 +1,24 @@
 'use client'
 
+import React from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
 import { useQuizData } from "@/hooks/useQuizData"
+import { debugAPIUrls } from "@/utils/apiDebug"
 import { Play, BookOpen } from "lucide-react"
 
 function DashboardContent() {
   const { user } = useAuth()
   const router = useRouter()
   const { categories, loading, error, refetch } = useQuizData()
+
+  // Debug API URLs on dashboard load
+  React.useEffect(() => {
+    debugAPIUrls()
+  }, [])
 
   const startQuiz = (categoryId: string) => {
     router.push(`/quiz/${categoryId}`)
