@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
-import { quizApi, APIError } from "@/services/api"
-import { 
-  Trophy, 
+import { leaderboardApi, APIError } from "@/services/api"
+import {
+  Trophy,
   Medal,
   Award,
   Crown,
@@ -21,10 +21,10 @@ interface LeaderboardEntry {
   userId: string
   username: string
   averageScore: number
-  totalAttempts: number
-  bestScore: number
-  totalTimeSpent: number
+  totalQuizzes: number
+  totalPoints: number
   rank: number
+  streakDays: number
 }
 
 function LeaderboardContent() {
@@ -42,11 +42,21 @@ function LeaderboardContent() {
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await quizApi.getLeaderboard()
-      
+
+      const response = await leaderboardApi.getLeaderboard()
+
       if (response.success) {
-        setLeaderboard(response.data)
+        // Transform LeaderboardData to LeaderboardEntry
+        const transformedData: LeaderboardEntry[] = response.data.map(item => ({
+          userId: item.userId,
+          username: item.userName,
+          averageScore: item.averageScore,
+          totalQuizzes: item.totalQuizzes,
+          totalPoints: item.totalPoints,
+          rank: item.rank,
+          streakDays: item.streakDays
+        }))
+        setLeaderboard(transformedData)
       } else {
         throw new APIError(response.message || 'Failed to load leaderboard', 500)
       }
@@ -135,145 +145,144 @@ function LeaderboardContent() {
             <p className="text-xl text-gray-600">See who's leading the pack in our quiz community</p>
           </div>
 
-        <div className="max-w-4xl mx-auto">
-          {/* Current User Position */}
-          {currentUserRank > 0 && currentUserRank > 3 && (
-            <Card className="mb-6 bg-blue-50 border-blue-200">
+          <div className="max-w-4xl mx-auto">
+            {/* Current User Position */}
+            {currentUserRank > 0 && currentUserRank > 3 && (
+              <Card className="mb-6 bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-900">Your Position</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-lg font-bold text-blue-600">#{currentUserRank}</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-blue-900">You</p>
+                        <p className="text-sm text-blue-700">
+                          {leaderboard[currentUserRank - 1]?.totalQuizzes} quizzes
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-blue-900">
+                        {leaderboard[currentUserRank - 1]?.averageScore}%
+                      </p>
+                      <p className="text-sm text-blue-700">Average Score</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Leaderboard */}
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg text-blue-900">Your Position</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Trophy className="h-6 w-6 text-yellow-500" />
+                  <span>Top Performers</span>
+                </CardTitle>
+                <CardDescription>
+                  Rankings based on average quiz scores
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-lg font-bold text-blue-600">#{currentUserRank}</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-blue-900">You</p>
-                      <p className="text-sm text-blue-700">
-                        {leaderboard[currentUserRank - 1]?.totalAttempts} attempts
-                      </p>
-                    </div>
+                {leaderboard.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">No leaderboard data available yet</p>
+                    <Button onClick={() => router.push('/dashboard/simple')}>
+                      Take Your First Quiz
+                    </Button>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-900">
-                      {leaderboard[currentUserRank - 1]?.averageScore}%
-                    </p>
-                    <p className="text-sm text-blue-700">Average Score</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                ) : (
+                  <div className="space-y-4">
+                    {leaderboard.slice(0, 20).map((entry, index) => {
+                      const isCurrentUser = entry.userId === user?.id
+                      const rank = index + 1
 
-          {/* Leaderboard */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Trophy className="h-6 w-6 text-yellow-500" />
-                <span>Top Performers</span>
-              </CardTitle>
-              <CardDescription>
-                Rankings based on average quiz scores
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {leaderboard.length === 0 ? (
-                <div className="text-center py-12">
-                  <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">No leaderboard data available yet</p>
-                  <Button onClick={() => router.push('/dashboard/simple')}>
-                    Take Your First Quiz
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {leaderboard.slice(0, 20).map((entry, index) => {
-                    const isCurrentUser = entry.userId === user?.id
-                    const rank = index + 1
-                    
-                    return (
-                      <div
-                        key={entry.userId}
-                        className={`p-4 rounded-lg border transition-all duration-200 ${getRankStyle(rank, isCurrentUser)}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center">
-                              {rank <= 3 ? (
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                  rank === 1 ? 'bg-yellow-100' :
-                                  rank === 2 ? 'bg-gray-100' : 'bg-amber-100'
+                      return (
+                        <div
+                          key={entry.userId}
+                          className={`p-4 rounded-lg border transition-all duration-200 ${getRankStyle(rank, isCurrentUser)}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 rounded-full flex items-center justify-center">
+                                {rank <= 3 ? (
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${rank === 1 ? 'bg-yellow-100' :
+                                      rank === 2 ? 'bg-gray-100' : 'bg-amber-100'
+                                    }`}>
+                                    {getRankIcon(rank)}
+                                  </div>
+                                ) : (
+                                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span className="text-lg font-bold text-gray-600">#{rank}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <p className={`font-semibold ${isCurrentUser ? 'text-blue-900' : 'text-gray-900'}`}>
+                                    {isCurrentUser ? 'You' : entry.username}
+                                  </p>
+                                  {isCurrentUser && <User className="h-4 w-4 text-blue-600" />}
+                                </div>
+                                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                  <div className="flex items-center space-x-1">
+                                    <Target className="h-3 w-3" />
+                                    <span>{entry.totalQuizzes} attempts</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Trophy className="h-3 w-3" />
+                                    <span>Best: {entry.totalPoints}%</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{formatTime(entry.totalPoints)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <div className={`text-2xl font-bold ${entry.averageScore >= 90 ? 'text-green-600' :
+                                  entry.averageScore >= 75 ? 'text-blue-600' :
+                                    entry.averageScore >= 60 ? 'text-yellow-600' : 'text-red-600'
                                 }`}>
-                                  {getRankIcon(rank)}
-                                </div>
-                              ) : (
-                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                  <span className="text-lg font-bold text-gray-600">#{rank}</span>
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <p className={`font-semibold ${isCurrentUser ? 'text-blue-900' : 'text-gray-900'}`}>
-                                  {isCurrentUser ? 'You' : entry.username}
-                                </p>
-                                {isCurrentUser && <User className="h-4 w-4 text-blue-600" />}
+                                {entry.averageScore}%
                               </div>
-                              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-1">
-                                  <Target className="h-3 w-3" />
-                                  <span>{entry.totalAttempts} attempts</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Trophy className="h-3 w-3" />
-                                  <span>Best: {entry.bestScore}%</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="h-3 w-3" />
-                                  <span>{formatTime(entry.totalTimeSpent)}</span>
-                                </div>
-                              </div>
+                              <p className="text-sm text-gray-600">Average</p>
                             </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className={`text-2xl font-bold ${
-                              entry.averageScore >= 90 ? 'text-green-600' :
-                              entry.averageScore >= 75 ? 'text-blue-600' :
-                              entry.averageScore >= 60 ? 'text-yellow-600' : 'text-red-600'
-                            }`}>
-                              {entry.averageScore}%
-                            </div>
-                            <p className="text-sm text-gray-600">Average</p>
                           </div>
                         </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center space-x-4 mt-12">
-            <Button 
-              onClick={() => router.push('/dashboard')}
-              className="bg-indigo-600 hover:bg-indigo-700"
-              size="lg"
-            >
-              Take a Quiz
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/performance')}
-              className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-              size="lg"
-            >
-              View Your Performance
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex justify-center space-x-4 mt-12">
+              <Button
+                onClick={() => router.push('/dashboard')}
+                className="bg-indigo-600 hover:bg-indigo-700"
+                size="lg"
+              >
+                Take a Quiz
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/performance')}
+                className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                size="lg"
+              >
+                View Your Performance
+              </Button>
+            </div>
           </div>
         </div>
       </div>
