@@ -113,14 +113,22 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         )
     }
 
-    // Only redirect to login if we're not loading and there's definitely no user
-    if (!loading && !user) {
-        console.log("No user found and not loading, redirecting to login")
-        router.push('/login')
-        return null
-    }
+    // Handle redirect to login in useEffect to avoid render-time redirects
+    useEffect(() => {
+        console.log("ProtectedRoute useEffect - loading:", loading, "user:", user ? "exists" : "null")
+        
+        // Add a small delay to ensure auth state is properly settled
+        const timer = setTimeout(() => {
+            if (!loading && !user) {
+                console.log("No user found and not loading, redirecting to login")
+                router.push('/login')
+            }
+        }, 100)
+        
+        return () => clearTimeout(timer)
+    }, [loading, user, router])
 
-    // If still loading, show loading state instead of redirecting
+    // If still loading, show loading state
     if (loading) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
@@ -129,11 +137,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         )
     }
 
-    // At this point, we should have a user (since we checked !loading && !user above)
+    // If no user after loading, show loading while redirecting
     if (!user) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
-                <div className='text-2xl font-semibold'>Something went wrong. Please refresh the page.</div>
+                <div className='text-2xl font-semibold'>Redirecting to login...</div>
             </div>
         )
     }

@@ -81,21 +81,21 @@ export interface LeaderboardEntry {
 export const simpleQuizApi = {
   // Get all quiz categories
   getCategories: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz`)
+    const response = await fetch(`${API_BASE_URL}/quiz`)
     if (!response.ok) throw new Error('Failed to fetch quiz categories')
     return response.json()
   },
 
   // Get 10 questions for a quiz
   getQuiz: async (quizId: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/${quizId}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/${quizId}`)
     if (!response.ok) throw new Error('Failed to fetch quiz questions')
     return response.json()
   },
 
   // Submit completed quiz
   submitQuiz: async (quizId: string, submission: QuizSubmission) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/${quizId}/submit`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/${quizId}/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ export const simpleQuizApi = {
 
   // Get user performance
   getUserPerformance: async (userId: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/performance/${userId}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/performance/${userId}`)
     if (!response.ok) throw new Error('Failed to fetch user performance')
     return response.json()
   },
@@ -119,7 +119,7 @@ export const simpleQuizApi = {
     if (category) params.append('category', category)
     params.append('limit', limit.toString())
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/quiz/leaderboard?${params}`)
+    const response = await fetch(`${API_BASE_URL}/quiz/leaderboard?${params}`)
     if (!response.ok) throw new Error('Failed to fetch leaderboard')
     return response.json()
   }

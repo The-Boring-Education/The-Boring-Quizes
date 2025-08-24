@@ -24,7 +24,7 @@ export default function Landing() {
     useEffect(() => {
         if (user) {
             if (user.isOnboarded) {
-                router.push("/dashboard")
+                router.push("/dashboard/simple")
             } else {
                 // Redirect to external onboarding app
                 const params = new URLSearchParams({
@@ -42,7 +42,7 @@ export default function Landing() {
     const handleGetStarted = () => {
         if (user) {
             if (user.isOnboarded) {
-                router.push("/dashboard")
+                router.push("/dashboard/simple")
             } else {
                 // Redirect to external onboarding app
                 const params = new URLSearchParams({
