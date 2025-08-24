@@ -368,6 +368,11 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
+    // Redirect to simplified dashboard
+    if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard/simple'
+    }
+    
     return (
         <ProtectedRoute>
             <DashboardContent />

@@ -792,6 +792,14 @@ function QuizContent() {
 }
 
 export default function QuizPage() {
+  // Redirect to simplified quiz
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+  const id = typeof window !== 'undefined' ? window.location.pathname.split('/')[2] : null
+  
+  if (typeof window !== 'undefined' && id) {
+    window.location.href = `/quiz/${id}/simple`
+  }
+  
   return (
     <ProtectedRoute>
       <QuizContent />
