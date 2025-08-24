@@ -12,6 +12,8 @@ export function debugAPIUrls() {
   console.log('Quiz Submit (test-id):', `${config.API_BASE_URL}${API_ENDPOINTS.QUIZ_SUBMIT('test-id')}`)
   console.log('Performance (test-user):', `${config.API_BASE_URL}${API_ENDPOINTS.QUIZ_PERFORMANCE('test-user')}`)
   console.log('Leaderboard:', `${config.API_BASE_URL}${API_ENDPOINTS.QUIZ_LEADERBOARD}`)
+  console.log('User Create:', `${config.API_BASE_URL}${API_ENDPOINTS.USER_CREATE}`)
+  console.log('User Onboarding:', `${config.API_BASE_URL}${API_ENDPOINTS.USER_ONBOARDING}`)
   console.log('')
   
   console.log('✅ Expected Endpoints:')
@@ -20,4 +22,6 @@ export function debugAPIUrls() {
   console.log('Quiz Submit: http://localhost:3000/api/v1/quiz/test-id/submit')
   console.log('Performance: http://localhost:3000/api/v1/quiz/performance/test-user')
   console.log('Leaderboard: http://localhost:3000/api/v1/quiz/leaderboard')
+  console.log('User Create: http://localhost:3000/api/v1/user')
+  console.log('User Onboarding: http://localhost:3000/api/v1/user/onboarding')
 }
