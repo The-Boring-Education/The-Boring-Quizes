@@ -48,27 +48,6 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    {/* Categories */}
-                    <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
-                            Categories
-                        </h4>
-                        <ul className="space-y-2">
-                            <li>
-                                <span className="text-gray-600 text-sm">JavaScript</span>
-                            </li>
-                            <li>
-                                <span className="text-gray-600 text-sm">React</span>
-                            </li>
-                            <li>
-                                <span className="text-gray-600 text-sm">Node.js</span>
-                            </li>
-                            <li>
-                                <span className="text-gray-600 text-sm">Algorithms</span>
-                            </li>
-                        </ul>
-                    </div>
-
                     {/* Connect */}
                     <div>
                         <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
@@ -76,21 +55,14 @@ export function Footer() {
                         </h4>
                         <div className="flex space-x-3">
                             <a 
-                                href="#" 
+                                href="https://github.com/orgs/The-Boring-Education" 
                                 className="text-gray-400 hover:text-indigo-600 transition-colors"
                                 aria-label="GitHub"
                             >
                                 <Github className="w-5 h-5" />
                             </a>
                             <a 
-                                href="#" 
-                                className="text-gray-400 hover:text-indigo-600 transition-colors"
-                                aria-label="Twitter"
-                            >
-                                <Twitter className="w-5 h-5" />
-                            </a>
-                            <a 
-                                href="#" 
+                                href="https://www.linkedin.com/company/theboringeducation/" 
                                 className="text-gray-400 hover:text-indigo-600 transition-colors"
                                 aria-label="LinkedIn"
                             >
@@ -109,17 +81,6 @@ export function Footer() {
                         <p className="text-gray-600 text-sm">
                             © {currentYear} The Boring Education. All rights reserved.
                         </p>
-                        <div className="flex space-x-6 mt-4 md:mt-0">
-                            <a href="#" className="text-gray-600 hover:text-indigo-600 text-sm">
-                                Privacy Policy
-                            </a>
-                            <a href="#" className="text-gray-600 hover:text-indigo-600 text-sm">
-                                Terms of Service
-                            </a>
-                            <a href="#" className="text-gray-600 hover:text-indigo-600 text-sm">
-                                Contact
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>

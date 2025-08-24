@@ -29,7 +29,7 @@ interface UserPerformance {
   lastActiveDate: string
 }
 
-function PerformanceContent() {
+const PerformanceContent = () => {
   const { user } = useAuth()
   const router = useRouter()
   const [performance, setPerformance] = useState<UserPerformance | null>(null)
@@ -198,63 +198,6 @@ function PerformanceContent() {
                       {formatTime(performance.totalTimeSpent)}
                     </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Additional Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Improvement Rate</span>
-                </CardTitle>
-                <CardDescription>
-                  Your learning progress over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">{performance.improvementRate}%</p>
-                  <p className="text-sm text-gray-600 mt-2">Improvement rate</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Streak Days</span>
-                </CardTitle>
-                <CardDescription>
-                  Consecutive days of activity
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-orange-600">{performance.streakDays}</p>
-                  <p className="text-sm text-gray-600 mt-2">Days in a row</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5" />
-                  <span>Average Time</span>
-                </CardTitle>
-                <CardDescription>
-                  Time per quiz on average
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">{formatTime(performance.averageTimePerQuiz)}</p>
-                  <p className="text-sm text-gray-600 mt-2">Per quiz</p>
                 </div>
               </CardContent>
             </Card>
