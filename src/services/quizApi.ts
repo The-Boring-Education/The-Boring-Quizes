@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL || 'http://localhost:3000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_TBE_WEBAPP_API_URL
 
 export interface QuizQuestion {
   question: string

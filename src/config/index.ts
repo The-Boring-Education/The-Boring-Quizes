@@ -5,31 +5,28 @@ export const config = {
 }
 
 export const API_ENDPOINTS = {
-    // Auth
-    AUTH_SESSION: "/api/v1/auth/session",
-    AUTH_SIGNOUT: "/api/v1/auth/signout",
+    // Auth - These endpoints should be relative to API_BASE_URL (http://localhost:3000/api/v1)
+    AUTH_SESSION: "/auth/session",
+    AUTH_SIGNOUT: "/auth/signout",
 
-    // Quiz - Updated to match TBE webapp structure
-    QUIZ_CATEGORIES: "/quiz",
-    QUIZ_QUESTIONS: (id: string) => `/quiz/${id}`,
-    QUIZ_SUBMIT: (id: string) => `/quiz/${id}/submit`,
-    QUIZ_PERFORMANCE: (userId: string) => `/quiz/performance/${userId}`,
-    QUIZ_LEADERBOARD: "/quiz/leaderboard",
-    QUIZ_HISTORY: "/quiz/history",
-    QUIZ_ATTEMPTS: "/quiz/attempts",
+    // Quiz - Matching actual TBE webapp API structure
+    QUIZ_CATEGORIES: "/quiz",                           // GET /api/v1/quiz
+    QUIZ_QUESTIONS: (id: string) => `/quiz/${id}`,      // GET /api/v1/quiz/[id]
+    QUIZ_SUBMIT: (id: string) => `/quiz/${id}/submit`,  // POST /api/v1/quiz/[id]/submit
+    QUIZ_PERFORMANCE: (userId: string) => `/quiz/performance/${userId}`, // GET /api/v1/quiz/performance/[userId]
+    QUIZ_LEADERBOARD: "/quiz/leaderboard",              // GET /api/v1/quiz/leaderboard
+    QUIZ_ATTEMPTS: "/quiz/attempts",                    // GET /api/v1/quiz/attempts
+    QUIZ_ANALYTICS: (userId: string) => `/quiz/analytics/${userId}`, // GET /api/v1/quiz/analytics/[userId]
 
-    // User
-    USER_CREATE: "/api/v1/user",
-    USER_ONBOARDING: "/api/v1/user/onboarding",
-    USER_PROFILE: "/api/v1/user/profile",
+    // User - Relative paths since API_BASE_URL includes /api/v1
+    USER_CREATE: "/user",
+    USER_ONBOARDING: "/user/onboarding", 
+    USER_PROFILE: "/user/profile",
 
-    // Analytics & Performance
-    ANALYTICS_PERFORMANCE: "/api/v1/analytics/performance",
-    ANALYTICS_CATEGORY_PERFORMANCE: "/api/v1/analytics/category-performance",
-    ANALYTICS_HISTORY: "/api/v1/analytics/history",
+    // Admin
+    ADMIN_QUIZ_ANALYTICS: "/admin/quiz-analytics",      // GET /api/v1/admin/quiz-analytics
 
-    // Gamification
-    USER_POINTS: "/api/v1/gamification/points",
-    LEADERBOARD: "/api/v1/gamification/leaderboard",
-    USER_RANK: "/api/v1/gamification/user-rank"
+    // Legacy gamification endpoints (if needed)
+    GAMIFICATION_LEADERBOARD: "/gamification/leaderboard",
+    USER_RANK: "/gamification/user-rank"
 }

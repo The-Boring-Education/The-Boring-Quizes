@@ -3,6 +3,7 @@ export { DashboardNav } from './layout/DashboardNav'
 
 // Common Components
 export { ProtectedRoute } from './ProtectedRoute'
+export { ClientAuth } from './ClientAuth'
 
 // UI Components
 export { Button } from './ui/button'
