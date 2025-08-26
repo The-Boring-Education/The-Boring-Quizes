@@ -23,7 +23,7 @@ export const API_ENDPOINTS = {
     // User - Relative paths since API_BASE_URL includes /api/v1
     USER_CREATE: "/user",
     USER_ONBOARDING: "/user/onboarding", 
-    USER_PROFILE: "/user/profile",
+    USER_PROFILE: "/user",
 
     // Admin
     ADMIN_QUIZ_ANALYTICS: "/admin/quiz-analytics",      // GET /api/v1/admin/quiz-analytics
