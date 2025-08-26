@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Calendar
 } from "lucide-react"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 interface UserPerformance {
   totalAttempts: number
@@ -229,5 +230,9 @@ const PerformanceContent = () => {
 }
 
 export default function Performance() {
-  return <PerformanceContent />
+  return (
+    <ProtectedRoute>
+      <PerformanceContent />
+    </ProtectedRoute>
+  )
 }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Layout } from "@/components/Layout"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi } from "@/services/quizApi"
 import { quizApi as mainQuizApi } from "@/services/api"
@@ -376,5 +377,5 @@ function QuizContent() {
 }
 
 export default function QuizPage() {
-  return <QuizContent />
+  return <ProtectedRoute><QuizContent /></ProtectedRoute>
 }

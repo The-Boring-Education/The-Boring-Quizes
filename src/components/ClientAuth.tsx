@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -9,9 +9,10 @@ interface ClientAuthProps {
 }
 
 export function ClientAuth({ children }: ClientAuthProps) {
-  const { user, loading } = useAuth()
+  const { user, loading, checkAuth } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const [authInitialized, setAuthInitialized] = useState(false)
 
   const protectedRoutes = ['/dashboard', '/performance', '/leaderboard', '/quiz']
   const publicRoutes = ['/login', '/']
@@ -19,8 +20,18 @@ export function ClientAuth({ children }: ClientAuthProps) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   const isPublicRoute = publicRoutes.includes(pathname)
 
+  // Initialize authentication state
   useEffect(() => {
-    if (loading) return // Wait for auth check to complete
+    if (!loading && !authInitialized) {
+      setAuthInitialized(true)
+    }
+  }, [loading, authInitialized])
+
+  // Handle authentication logic
+  useEffect(() => {
+    if (!authInitialized) {
+      return
+    }
 
     // If accessing a protected route without authentication
     if (isProtectedRoute && !user) {
@@ -39,10 +50,10 @@ export function ClientAuth({ children }: ClientAuthProps) {
       router.replace('/dashboard')
       return
     }
-  }, [user, loading, pathname, router, isProtectedRoute])
+  }, [user, loading, pathname, router, isProtectedRoute, authInitialized])
 
   // Show loading spinner during auth check for protected routes
-  if (loading && isProtectedRoute) {
+  if (loading || (!authInitialized && isProtectedRoute)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -54,7 +65,7 @@ export function ClientAuth({ children }: ClientAuthProps) {
   }
 
   // Don't render protected content if not authenticated
-  if (!loading && isProtectedRoute && !user) {
+  if (authInitialized && isProtectedRoute && !user) {
     return null // Will redirect in useEffect
   }
 

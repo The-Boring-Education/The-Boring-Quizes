@@ -26,33 +26,39 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     // Check authentication status on mount
     const checkAuth = async () => {
         try {
-            console.log("checkAuth: Starting authentication check")
             setLoading(true)
             
             if (typeof window !== 'undefined') {
                 const storedUser = localStorage.getItem("quizUser")
-                console.log("checkAuth: Stored user from localStorage:", storedUser ? "exists" : "null")
                 
                 if (storedUser) {
                     const userData = JSON.parse(storedUser)
-                    // Use the actual isOnboarded value from stored data
-                    console.log("checkAuth: Setting user from localStorage:", userData)
                     setUser(userData)
                     
                     // Verify user still exists in backend
                     try {
-                        console.log("checkAuth: Verifying user with backend...")
-                        const response = await userApi.getUserByEmail(userData.email) as any
-                        if (!response?.data?.data) {
-                            // User doesn't exist in backend, clear local data
-                            console.log("checkAuth: User not found in backend, clearing local data")
-                            localStorage.removeItem("quizUser")
-                            localStorage.removeItem("quizToken")
-                            setUser(null)
+                        // Use getUserById if we have a userId, otherwise fallback to getUserByEmail
+                        let response;
+                        if (userData.id) {
+                            response = await userApi.getUserById(userData.id) as any;
                         } else {
-                            // Update user data from backend to ensure it's current
-                            console.log("checkAuth: User verified in backend, updating data")
-                            const backendUserData = response.data.data
+                            response = await userApi.getUserByEmail(userData.email) as any;
+                        }
+                        
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Backend verification timeout')), 5000)
+                        )
+                        
+                        const responseWithTimeout = await Promise.race([Promise.resolve(response), timeoutPromise]) as any
+                        
+                        if (!responseWithTimeout?.data) {
+                            if (responseWithTimeout?.status === 404 || responseWithTimeout?.data?.message === 'User not found') {
+                                localStorage.removeItem("quizUser")
+                                localStorage.removeItem("quizToken")
+                                setUser(null)
+                            }
+                        } else {
+                            const backendUserData = responseWithTimeout.data
                             const updatedUser: User = {
                                 id: backendUserData._id,
                                 name: backendUserData.name,
@@ -65,13 +71,22 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
                             }
                             setUser(updatedUser)
                             localStorage.setItem("quizUser", JSON.stringify(updatedUser))
+                            
+                            if (typeof window !== 'undefined') {
+                                localStorage.removeItem("quizBackendVerificationFailed")
+                            }
                         }
                     } catch (error) {
-                        // If verification fails, keep user logged in locally
-                        console.warn("Could not verify user with backend:", error)
+                        if (error instanceof Error && error.message.includes('Backend verification timeout')) {
+                            console.warn("Backend verification timed out, keeping user logged in locally")
+                        } else {
+                            console.warn("Could not verify user with backend, keeping local auth:", error)
+                        }
+                        
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem("quizBackendVerificationFailed", "true")
+                        }
                     }
-                } else {
-                    console.log("checkAuth: No stored user found")
                 }
             }
         } catch (error) {
@@ -82,8 +97,6 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             }
             setUser(null)
         } finally {
-            // Always set loading to false after auth check is complete
-            console.log("checkAuth: Setting loading to false")
             setLoading(false)
         }
     }
@@ -231,15 +244,32 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
 
     const refreshUserFromBackend = async () => {
         try {
-          const response = await userApi.getUserByEmail(user?.email || "") as any;
-          const data = response.data.data;
+          // Use getUserById if we have a userId, otherwise fallback to getUserByEmail
+          let response;
+          if (user?.id) {
+              response = await userApi.getUserById(user.id) as any;
+          } else {
+              response = await userApi.getUserByEmail(user?.email || "") as any;
+          }
+          
+          // Check if response has the expected structure
+          // The actual structure is: {status: true, data: {...}}
+          console.log("refreshUserFromBackend response:", response);
+          console.log("response.data:", response?.data);
+          
+          if (!response?.data) {
+              console.error("Invalid response structure from backend:", response);
+              throw new Error("Invalid response structure from backend");
+          }
+          
+          const data = response.data;
       
           const updatedUser: User = {
             id: data._id,
             name: data.name,
             email: data.email,
             image: data.image,
-            isOnboarded: data.isOnboarded, // Use the actual value from backend
+            isOnboarded: data.isOnboarded,
             userName: data.userName,
             occupation: data.occupation,
             purpose: data.purpose,
@@ -250,8 +280,21 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
             localStorage.setItem("quizUser", JSON.stringify(updatedUser));
           }
         } catch (error) {
+          console.error("Failed to refresh user from backend:", error);
+          throw error; // Re-throw to let the caller handle it
         }
       };
+
+    // Retry backend verification if it failed initially
+    const retryBackendVerification = async () => {
+        if (typeof window !== 'undefined' && localStorage.getItem("quizBackendVerificationFailed")) {
+            try {
+                await refreshUserFromBackend()
+            } catch (error) {
+                console.warn("Backend verification retry failed:", error)
+            }
+        }
+    }
 
     const value = {
         user,
@@ -260,6 +303,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         signOut,
         updateUser,
         refreshUserFromBackend,
+        retryBackendVerification,
         checkAuth
     }
 
