@@ -58,9 +58,7 @@ const PerformanceContent = () => {
         throw new APIError(response.message || 'Failed to load performance', 500)
       }
     } catch (err) {
-      console.error('Error loading performance:', err)
-      const errorMessage = err instanceof APIError ? err.message : 'Failed to load performance'
-      setError(errorMessage)
+        // Failed to load performance data
     } finally {
       setLoading(false)
     }

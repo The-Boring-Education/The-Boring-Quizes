@@ -61,9 +61,7 @@ function LeaderboardContent() {
         throw new APIError(response.message || 'Failed to load leaderboard', 500)
       }
     } catch (err) {
-      console.error('Error loading leaderboard:', err)
-      const errorMessage = err instanceof APIError ? err.message : 'Failed to load leaderboard'
-      setError(errorMessage)
+      // Failed to load leaderboard data
     } finally {
       setLoading(false)
     }

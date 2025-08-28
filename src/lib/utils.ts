@@ -1,8 +1,34 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { User } from "@/types/auth"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Validates if a user object has all required fields
+ * @param user - The user object to validate
+ * @returns true if user is valid, false otherwise
+ */
+export function isValidUser(user: User | null): user is User {
+  return user !== null && 
+         typeof user === 'object' && 
+         typeof user.id === 'string' && 
+         user.id.length > 0 &&
+         typeof user.name === 'string' && 
+         user.name.length > 0 &&
+         typeof user.email === 'string' && 
+         user.email.length > 0
+}
+
+/**
+ * Safely gets user ID with validation
+ * @param user - The user object
+ * @returns user ID if valid, null otherwise
+ */
+export function getValidUserId(user: User | null): string | null {
+  return isValidUser(user) ? user.id : null
 }
 
 export function debounce<T extends (...args: unknown[]) => unknown>(

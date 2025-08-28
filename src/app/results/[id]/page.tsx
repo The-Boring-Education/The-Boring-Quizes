@@ -96,14 +96,20 @@ function ResultsContent() {
     
             try {
                 const answersArray = answers.map((answer) => answer ?? -1)
-    
+
+                // Ensure user has a valid ID before submitting
+                if (!user.id) {
+                    alert('User authentication error. Please try logging in again.')
+                    router.push('/login')
+                    return
+                }
+
                 await quizApi.submitAttempt(id, {
                     userId: user.id,
                     answers: answersArray,
                     timeTaken
                 })
             } catch (error) {
-                console.error("Failed to submit results:", error)
                 hasSubmittedRef.current = false // allow retry if needed
             }
         }
