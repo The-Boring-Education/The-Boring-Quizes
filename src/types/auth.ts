@@ -23,5 +23,6 @@ export interface AuthContextType {
     signOut: () => Promise<void>
     updateUser: (updates: Partial<User>) => void
     refreshUserFromBackend: () => Promise<void>
+    retryBackendVerification: () => Promise<void>
     checkAuth: () => Promise<void>
 }

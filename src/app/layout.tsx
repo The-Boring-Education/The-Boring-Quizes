@@ -3,6 +3,7 @@
 import { Inter } from 'next/font/google'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ClientAuth } from '@/components/ClientAuth'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from 'sonner'
 import './globals.css'
@@ -47,9 +48,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryProvider>
           <AuthProvider>
-            <div className="min-h-screen bg-background text-foreground">
-              {children}
-            </div>
+            <ClientAuth>
+              <div className="min-h-screen bg-background text-foreground">
+                {children}
+              </div>
+            </ClientAuth>
             <Toaster />
             <Sonner />
           </AuthProvider>

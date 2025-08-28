@@ -27,7 +27,7 @@ function ResultsContent() {
     const searchParams = useSearchParams()
     const { user } = useAuth()
 
-    const categoryId = params.categoryId as string
+    const id = params.id as string
     const answersParam = searchParams.get('answers')
     const timeTakenParam = searchParams.get('timeTaken')
 
@@ -41,9 +41,9 @@ function ResultsContent() {
         isLoading,
         error
     } = useQuery({
-        queryKey: ["quiz", categoryId],
-        queryFn: () => quizApi.getQuestions(categoryId!),
-        enabled: !!categoryId
+        queryKey: ["quiz", id],
+        queryFn: () => quizApi.getQuestions(id!),
+        enabled: !!id
     })
 
     const questions: Question[] =
@@ -63,12 +63,12 @@ function ResultsContent() {
         try {
             trackEvent("quiz_results_view", {
                 category: "quiz",
-                categoryId,
+                quizId: id,
                 timeTaken,
                 answeredCount: answers.filter((a) => a !== null).length
             })
         } catch {}
-    }, [categoryId, timeTaken, answers])
+    }, [id, timeTaken, answers])
 
     // Calculate score
     const score = answers.reduce((acc: number, answer, index) => {
@@ -87,7 +87,7 @@ function ResultsContent() {
             if (
                 hasSubmittedRef.current ||
                 !user?.id ||
-                !categoryId ||
+                !id ||
                 answers.length === 0
             )
                 return
@@ -96,20 +96,26 @@ function ResultsContent() {
     
             try {
                 const answersArray = answers.map((answer) => answer ?? -1)
-    
-                await quizApi.submitAttempt(categoryId, {
+
+                // Ensure user has a valid ID before submitting
+                if (!user.id) {
+                    alert('User authentication error. Please try logging in again.')
+                    router.push('/login')
+                    return
+                }
+
+                await quizApi.submitAttempt(id, {
                     userId: user.id,
                     answers: answersArray,
                     timeTaken
                 })
             } catch (error) {
-                console.error("Failed to submit results:", error)
                 hasSubmittedRef.current = false // allow retry if needed
             }
         }
     
         submitResults()
-    }, [user?.id, categoryId, answers, timeTaken])
+    }, [user?.id, id, answers, timeTaken])
 
     if (isLoading) {
         return (
@@ -199,7 +205,7 @@ function ResultsContent() {
                     {/* Action Buttons */}
                     <div className='flex flex-col sm:flex-row gap-4'>
                         <button
-                            onClick={() => router.push(`/quiz/${categoryId}`)}
+                            onClick={() => router.push(`/quiz/${id}`)}
                             className='flex-1 bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors'>
                             Try Again
                         </button>

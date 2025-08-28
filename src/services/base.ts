@@ -39,7 +39,11 @@ export class APIClient {
   }
 
   private buildURL(endpoint: string, params?: Record<string, string>): string {
-    const url = new URL(endpoint, this.baseURL)
+    // Ensure endpoint doesn't start with / to avoid double slashes
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
+    const fullUrl = `${this.baseURL}/${cleanEndpoint}`
+    
+    const url = new URL(fullUrl)
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value)
@@ -96,6 +100,7 @@ export class APIClient {
     data?: unknown,
     options: RequestOptions = {}
   ): Promise<T> {
+
     const response = await fetch(this.buildURL(endpoint), {
       method: "POST",
       headers: {

@@ -1,6 +1,6 @@
 import { apiClient, APIError } from "./base"
 import { API_ENDPOINTS } from "@/config"
-import { APIResponse, QuizCategoryAPI, QuizQuestionsData, QuizAttempt } from "@/types/api"
+import { APIResponse, QuizCategoryAPI, QuizQuestionsData, QuizAttempt, PerformanceMetrics, CategoryPerformance, PerformanceHistory, LeaderboardData, UserProfile } from "@/types/api"
 
 // User APIs
 export const userApi = {
@@ -21,12 +21,25 @@ export const userApi = {
 
     getUserByEmail: async (email: string) => {
         try {
-            return await apiClient.get(API_ENDPOINTS.USER_CREATE, {
+            const response = await apiClient.get(API_ENDPOINTS.USER_CREATE, {
                 params: { email }
             })
+            return response
         } catch (error) {
             console.error("Error getting user by email:", error)
-            throw error
+            return { data: { data: null } }
+        }
+    },
+
+    getUserById: async (userId: string) => {
+        try {
+            const response = await apiClient.get(API_ENDPOINTS.USER_CREATE, {
+                params: { userId }
+            })
+            return response
+        } catch (error) {
+            console.error("Error getting user by ID:", error)
+            return { data: { data: null } }
         }
     },
 
@@ -84,6 +97,7 @@ export const authApi = {
 
 // Quiz APIs
 export const quizApi = {
+    // Get all quiz categories
     getCategories: async (): Promise<APIResponse<QuizCategoryAPI[]>> => {
         try {
             return await apiClient.get<APIResponse<QuizCategoryAPI[]>>(API_ENDPOINTS.QUIZ_CATEGORIES)
@@ -93,17 +107,64 @@ export const quizApi = {
         }
     },
 
-    getQuestions: async (categoryId: string): Promise<APIResponse<QuizQuestionsData>> => {
+    // Get 10 questions for a quiz (simplified)
+    getQuestions: async (id: string): Promise<APIResponse<QuizQuestionsData>> => {
         try {
-            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(categoryId))
+            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(id))
         } catch (error) {
             console.error("Error fetching quiz questions:", error)
             throw error
         }
     },
 
+    // Submit completed quiz with all answers (matching TBE webapp format)
+    submitQuiz: async (
+        id: string, 
+        data: {
+            userId: string
+            answers: {
+                questionIndex: number
+                selectedAnswer: number
+                isCorrect: boolean
+                timeSpent: number
+            }[]
+            totalTimeSpent: number
+        }
+    ) => {
+        try {
+            return await apiClient.post(API_ENDPOINTS.QUIZ_SUBMIT(id), data)
+        } catch (error) {
+            console.error("Error submitting quiz:", error)
+            throw error
+        }
+    },
+
+    // Get user performance analytics
+    getUserPerformance: async (userId: string) => {
+        try {
+            return await apiClient.get(API_ENDPOINTS.QUIZ_PERFORMANCE(userId))
+        } catch (error) {
+            console.error("Error fetching user performance:", error)
+            throw error
+        }
+    },
+
+    // Get global leaderboard
+    getLeaderboard: async (category?: string, limit: number = 50) => {
+        try {
+            const params: Record<string, string> = { limit: limit.toString() }
+            if (category) params.category = category
+            
+            return await apiClient.get(API_ENDPOINTS.QUIZ_LEADERBOARD, { params })
+        } catch (error) {
+            console.error("Error fetching leaderboard:", error)
+            throw error
+        }
+    },
+
+    // Legacy methods for backward compatibility
     submitAttempt: async (
-        categoryId: string, 
+        id: string, 
         data: {
             userId: string
             answers: number[]
@@ -112,7 +173,7 @@ export const quizApi = {
     ) => {
         try {
             return await apiClient.post(
-                `${API_ENDPOINTS.QUIZ_QUESTIONS(categoryId)}/attempt`, 
+                `${API_ENDPOINTS.QUIZ_QUESTIONS(id)}/attempt`, 
                 data
             )
         } catch (error) {
@@ -128,6 +189,77 @@ export const quizApi = {
             })
         } catch (error) {
             console.error("Error fetching user attempts:", error)
+            throw error
+        }
+    }
+}
+
+// Analytics & Performance APIs (using quiz endpoints)
+export const analyticsApi = {
+    getPerformanceMetrics: async (userId: string): Promise<APIResponse<PerformanceMetrics>> => {
+        try {
+            return await apiClient.get<APIResponse<PerformanceMetrics>>(API_ENDPOINTS.QUIZ_PERFORMANCE(userId))
+        } catch (error) {
+            console.error("Error fetching performance metrics:", error)
+            throw error
+        }
+    },
+
+    getCategoryPerformance: async (userId: string): Promise<APIResponse<CategoryPerformance[]>> => {
+        try {
+            return await apiClient.get<APIResponse<CategoryPerformance[]>>(API_ENDPOINTS.QUIZ_ANALYTICS(userId))
+        } catch (error) {
+            console.error("Error fetching category performance:", error)
+            throw error
+        }
+    },
+
+    getPerformanceHistory: async (userId: string, days: number = 30): Promise<APIResponse<PerformanceHistory[]>> => {
+        try {
+            return await apiClient.get<APIResponse<PerformanceHistory[]>>(API_ENDPOINTS.QUIZ_ANALYTICS(userId), {
+                params: { days: days.toString() }
+            })
+        } catch (error) {
+            console.error("Error fetching performance history:", error)
+            throw error
+        }
+    }
+}
+
+// Leaderboard APIs (using quiz endpoints)
+export const leaderboardApi = {
+    getLeaderboard: async (limit: number = 50): Promise<APIResponse<LeaderboardData[]>> => {
+        try {
+            return await apiClient.get<APIResponse<LeaderboardData[]>>(API_ENDPOINTS.QUIZ_LEADERBOARD, {
+                params: { limit: limit.toString() }
+            })
+        } catch (error) {
+            console.error("Error fetching leaderboard:", error)
+            throw error
+        }
+    },
+
+    getUserRank: async (userId: string): Promise<APIResponse<{ rank: number }>> => {
+        try {
+            return await apiClient.get<APIResponse<{ rank: number }>>(API_ENDPOINTS.GAMIFICATION_LEADERBOARD, {
+                params: { userId }
+            })
+        } catch (error) {
+            console.error("Error fetching user rank:", error)
+            throw error
+        }
+    }
+}
+
+// User Profile APIs
+export const userProfileApi = {
+    getUserProfile: async (userId: string): Promise<APIResponse<UserProfile>> => {
+        try {
+            return await apiClient.get<APIResponse<UserProfile>>(API_ENDPOINTS.USER_PROFILE, {
+                params: { userId }
+            })
+        } catch (error) {
+            console.error("Error fetching user profile:", error)
             throw error
         }
     }
