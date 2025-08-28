@@ -1,52 +1,42 @@
 'use client'
 
-import { ReactNode, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import { config } from "@/config"
+import { getValidUserId } from "@/lib/utils"
 
 interface ProtectedRouteProps {
-    children: ReactNode
+    children: React.ReactNode
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-    const { user, loading, refreshUserFromBackend, checkAuth, retryBackendVerification } = useAuth()
+    const { user, loading, refreshUserFromBackend } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
 
     const [hasRefreshed, setHasRefreshed] = useState(false)
     const [refreshingUser, setRefreshingUser] = useState(false)
     const [redirectingToOnboarding, setRedirectingToOnboarding] = useState(false)
-    const [authChecked, setAuthChecked] = useState(false)
-    const [isProcessingOnboarding, setIsProcessingOnboarding] = useState(false);
+    const [isProcessingOnboarding, setIsProcessingOnboarding] = useState(false)
 
     const cameFromOnboarding = searchParams.get("onboardingComplete") === "true"
 
     // Handle onboarding redirection and refresh logic
     useEffect(() => {
         if (!loading && user) {
+            // Handle onboarding completion
             if (cameFromOnboarding && !hasRefreshed) {
                 setRefreshingUser(true)
-
-                // Force refresh user data from backend
+                
                 const refreshUserData = async () => {
-                    if (isProcessingOnboarding) return; // Prevent multiple simultaneous calls
+                    if (isProcessingOnboarding) return
                     
-                    setIsProcessingOnboarding(true);
+                    setIsProcessingOnboarding(true)
                     try {
                         await refreshUserFromBackend?.()
-                        console.log("User data refreshed after onboarding")
                     } catch (err) {
-                        console.error("Failed to refresh user after onboarding:", err)
-                        // Try to refresh auth as fallback
-                        try {
-                            await checkAuth()
-                            console.log("Fallback auth refresh completed")
-                        } catch (fallbackErr) {
-                            console.error("Fallback auth refresh also failed:", fallbackErr)
-                            // Even if both fail, mark as refreshed to prevent infinite loop
-                            // The user will stay logged in with their current data
-                        }
+                        // Failed to refresh user after onboarding
                     } finally {
                         setHasRefreshed(true)
                         setRefreshingUser(false)
@@ -58,20 +48,27 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
                 return
             }
 
-            // Check if user is onboarded after refresh
+            // Check if user needs onboarding
             if (user.isOnboarded === false || user.isOnboarded === undefined) {
                 // Only redirect if we haven't just come from onboarding
                 if (!cameFromOnboarding) {
+                    const validUserId = getValidUserId(user)
+                    if (!validUserId) {
+                        // If user object is incomplete, redirect to login to re-authenticate
+                        router.push('/login')
+                        return
+                    }
+                    
                     setRedirectingToOnboarding(true)
                     
                     if (!config.ONBOARDING_APP_URL) {
-                        console.error("ONBOARDING_APP_URL is not set in config!")
+                        // ONBOARDING_APP_URL is not set in config
                         router.push('/login')
                         return
                     }
                     
                     const redirectParams = new URLSearchParams({
-                        userId: user.id,
+                        userId: validUserId,
                         from: "quizapp",
                         redirect: `${window.location.origin}/dashboard?onboardingComplete=true`
                     })
@@ -91,68 +88,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         hasRefreshed,
         cameFromOnboarding,
         router,
-        isProcessingOnboarding
+        isProcessingOnboarding,
+        refreshUserFromBackend
     ])
 
-    // Enhanced authentication check with better timing
-    useEffect(() => {
-        if (loading) {
-            return
-        }
-
-        if (user) {
-            setAuthChecked(true)
-            return
-        }
-
-        if (!user && !loading && !authChecked) {
-            const refreshAuth = async () => {
-                try {
-                    await checkAuth()
-                    
-                    if (!user) {
-                        await retryBackendVerification()
-                        
-                        await new Promise(resolve => setTimeout(resolve, 1000))
-                    }
-                } catch (error) {
-                    console.error("Failed to refresh auth:", error)
-                }
-            }
-            
-            refreshAuth()
-            
-            const timer = setTimeout(() => {
-                if (!user) {
-                    router.push('/login')
-                }
-            }, 2000)
-            
-            return () => clearTimeout(timer)
-        }
-    }, [loading, user, router, checkAuth, authChecked, retryBackendVerification])
-
-    // Show loading state while any of these are happening
-    if (loading || refreshingUser || redirectingToOnboarding) {
+    // Show loading state while redirecting to onboarding
+    if (redirectingToOnboarding) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
-                <div className='text-2xl font-semibold'>
-                    {redirectingToOnboarding ? 'Redirecting to onboarding...' : 'Loading...'}
-                </div>
+                <div className='text-2xl font-semibold'>Redirecting to onboarding...</div>
             </div>
         )
     }
 
-    // If no user after loading and auth check, show loading while redirecting
-    if (!user && authChecked) {
-        return (
-            <div className='min-h-screen flex items-center justify-center'>
-                <div className='text-2xl font-semibold'>Redirecting to login...</div>
-            </div>
-        )
-    }
-
-    if (cameFromOnboarding && !hasRefreshed) {
+    // Show loading state while refreshing user data
+    if (refreshingUser) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
                 <div className='text-2xl font-semibold'>Refreshing user data...</div>
@@ -160,7 +110,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         )
     }
 
-    if (user && (user.isOnboarded === false || user.isOnboarded === undefined)) {
+    // If user needs onboarding, show loading while redirecting
+    if (user && (user.isOnboarded === false || user.isOnboarded === undefined) && !cameFromOnboarding) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
                 <div className='text-2xl font-semibold'>Redirecting to onboarding...</div>

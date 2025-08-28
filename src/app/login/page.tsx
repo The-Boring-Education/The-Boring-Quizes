@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import { config } from "@/config"
+import { getValidUserId } from "@/lib/utils"
 import { Brain, Sparkles, Trophy, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,14 +17,17 @@ export default function Login() {
 
     useEffect(() => {
         if (user) {
-            console.log("User found in login page:", user)
+            const validUserId = getValidUserId(user)
+            if (!validUserId) {
+                // If user object is incomplete, stay on login page
+                return
+            }
+            
             if (user.isOnboarded) {
-                console.log("User is onboarded, redirecting to dashboard")
                 router.push("/dashboard")
             } else {
-                console.log("User not onboarded, redirecting to onboarding")
                 const params = new URLSearchParams({
-                    userId: user.id,
+                    userId: validUserId,
                     from: "quizapp",
                     redirect:
                         window.location.origin +

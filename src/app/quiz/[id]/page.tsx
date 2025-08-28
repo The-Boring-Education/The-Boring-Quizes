@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi } from "@/services/quizApi"
 import { quizApi as mainQuizApi } from "@/services/api"
+import { getValidUserId } from "@/lib/utils"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
 
 interface QuizQuestion {
@@ -65,10 +66,7 @@ function QuizContent() {
         throw new Error(response.message || 'Failed to load quiz')
       }
     } catch (error) {
-      console.error('Error loading quiz:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load quiz'
-      alert(`${errorMessage}. Please try again.`)
-      router.back()
+      alert('Failed to load quiz. Please try again.')
     }
   }
 
@@ -120,8 +118,16 @@ function QuizContent() {
         }
       })
 
+      // Ensure user has a valid ID before submitting
+      const validUserId = getValidUserId(user)
+      if (!validUserId) {
+        alert('User authentication error. Please try logging in again.')
+        router.push('/login')
+        return
+      }
+
       const submission = {
-        userId: user.id,
+        userId: validUserId,
         answers,
         totalTimeSpent
       }
@@ -138,10 +144,9 @@ function QuizContent() {
           : 'Failed to submit quiz'
         throw new Error(message)
       }
-    } catch (error) {
-      console.error('Error submitting quiz:', error)
-      alert('Failed to submit quiz. Please try again.')
-    }
+          } catch (error) {
+        alert('Failed to submit quiz. Please try again.')
+      }
   }
 
   const restartQuiz = () => {
