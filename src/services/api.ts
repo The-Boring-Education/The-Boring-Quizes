@@ -21,12 +21,25 @@ export const userApi = {
 
     getUserByEmail: async (email: string) => {
         try {
-            return await apiClient.get(API_ENDPOINTS.USER_CREATE, {
+            const response = await apiClient.get(API_ENDPOINTS.USER_CREATE, {
                 params: { email }
             })
+            return response
         } catch (error) {
             console.error("Error getting user by email:", error)
-            throw error
+            return { data: { data: null } }
+        }
+    },
+
+    getUserById: async (userId: string) => {
+        try {
+            const response = await apiClient.get(API_ENDPOINTS.USER_CREATE, {
+                params: { userId }
+            })
+            return response
+        } catch (error) {
+            console.error("Error getting user by ID:", error)
+            return { data: { data: null } }
         }
     },
 
