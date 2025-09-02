@@ -18,7 +18,8 @@ import {
     Zap,
     Eye,
     RefreshCw,
-    Filter
+    Filter,
+    Clock
 } from 'lucide-react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DashboardNav } from '@/components/layout/DashboardNav'
@@ -65,7 +66,7 @@ function RankBadge({ rank, className = '' }: RankBadgeProps) {
 
 // Leaderboard Entry Component
 interface LeaderboardEntryProps {
-    entry: LeaderboardData
+    entry: LeaderboardData & { rank: number }
     isCurrentUser: boolean
     onViewProfile: (userId: string) => void
 }
@@ -80,6 +81,15 @@ function LeaderboardEntry({ entry, isCurrentUser, onViewProfile }: LeaderboardEn
             .slice(0, 2)
     }
 
+    const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600)
+        const minutes = Math.floor((seconds % 3600) / 60)
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`
+        }
+        return `${minutes}m`
+    }
+
     return (
         <div className={`flex items-center space-x-4 p-4 rounded-lg transition-all duration-200 ${
             isCurrentUser 
@@ -90,16 +100,16 @@ function LeaderboardEntry({ entry, isCurrentUser, onViewProfile }: LeaderboardEn
             
             <div className="flex items-center space-x-3 flex-1">
                 <Avatar className="h-10 w-10">
-                    <AvatarImage src={entry.userImage} alt={entry.userName} />
+                    <AvatarImage src={entry.image} alt={entry.username} />
                     <AvatarFallback className="text-sm">
-                        {getInitials(entry.userName)}
+                        {getInitials(entry.username)}
                     </AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1">
                     <div className="flex items-center space-x-2">
                         <h3 className={`font-semibold ${isCurrentUser ? 'text-primary' : ''}`}>
-                            {entry.userName}
+                            {entry.username}
                         </h3>
                         {isCurrentUser && (
                             <Badge variant="secondary" className="text-xs">
@@ -110,15 +120,15 @@ function LeaderboardEntry({ entry, isCurrentUser, onViewProfile }: LeaderboardEn
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <span className="flex items-center space-x-1">
                             <Target className="w-3 h-3" />
-                            <span>{entry.totalQuizzes} quizzes</span>
+                            <span>{entry.totalAttempts} attempts</span>
                         </span>
                         <span className="flex items-center space-x-1">
                             <TrendingUp className="w-3 h-3" />
                             <span>{entry.averageScore}% avg</span>
                         </span>
                         <span className="flex items-center space-x-1">
-                            <Zap className="w-3 h-3" />
-                            <span>{entry.streakDays} day streak</span>
+                            <Clock className="w-3 h-3" />
+                            <span>{formatTime(entry.totalTimeSpent)}</span>
                         </span>
                     </div>
                 </div>
@@ -126,15 +136,15 @@ function LeaderboardEntry({ entry, isCurrentUser, onViewProfile }: LeaderboardEn
             
             <div className="text-right">
                 <div className="text-2xl font-bold text-primary">
-                    {entry.totalPoints}
+                    {entry.bestScore}%
                 </div>
-                <div className="text-sm text-muted-foreground">points</div>
+                <div className="text-sm text-muted-foreground">best score</div>
             </div>
             
             <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onViewProfile(entry.userId)}
+                onClick={() => onViewProfile(entry._id)}
                 className="ml-4"
             >
                 <Eye className="w-4 h-4" />
@@ -243,11 +253,15 @@ function LeaderboardContent() {
         isLoading: leaderboardLoading,
         error: leaderboardError,
         refetch: refetchLeaderboard
-    } = useQuery<LeaderboardData[]>({
+    } = useQuery<(LeaderboardData & { rank: number })[]>({
         queryKey: ['leaderboard', leaderboardLimit],
         queryFn: async () => {
             const response = await leaderboardApi.getLeaderboard(leaderboardLimit)
-            return response.data
+            // Add rank to each entry based on position
+            return response.data.map((entry, index) => ({
+                ...entry,
+                rank: index + 1
+            }))
         }
     })
 
@@ -399,19 +413,19 @@ function LeaderboardContent() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {leaderboard.map((entry, index) => (
-                                    <div
-                                        key={entry.userId}
-                                        className="animate-fade-in"
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                    >
-                                        <LeaderboardEntry
-                                            entry={entry}
-                                            isCurrentUser={entry.userId === user?.id}
-                                            onViewProfile={handleViewProfile}
-                                        />
-                                    </div>
-                                ))}
+                                                        {leaderboard.map((entry, index) => (
+                            <div
+                                key={entry._id}
+                                className="animate-fade-in"
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                            >
+                                <LeaderboardEntry
+                                    entry={entry}
+                                    isCurrentUser={entry._id === user?.id}
+                                    onViewProfile={handleViewProfile}
+                                />
+                            </div>
+                        ))}
                             </div>
                         )}
                     </CardContent>

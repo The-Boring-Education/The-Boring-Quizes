@@ -18,13 +18,14 @@ import {
 } from "lucide-react"
 
 interface LeaderboardEntry {
-  userId: string
+  _id: string
   username: string
+  image: string
+  bestScore: number
+  totalAttempts: number
   averageScore: number
-  totalQuizzes: number
-  totalPoints: number
+  totalTimeSpent: number
   rank: number
-  streakDays: number
 }
 
 function LeaderboardContent() {
@@ -47,14 +48,15 @@ function LeaderboardContent() {
 
       if (response.success) {
         // Transform LeaderboardData to LeaderboardEntry
-        const transformedData: LeaderboardEntry[] = response.data.map(item => ({
-          userId: item.userId,
-          username: item.userName,
-          averageScore: item.averageScore,
-          totalQuizzes: item.totalQuizzes,
-          totalPoints: item.totalPoints,
-          rank: item.rank,
-          streakDays: item.streakDays
+        const transformedData: LeaderboardEntry[] = response.data.map((item, index) => ({
+          _id: item._id || '',
+          username: item.username || 'Unknown User',
+          image: item.image || '',
+          bestScore: item.bestScore || 0,
+          totalAttempts: item.totalAttempts || 0,
+          averageScore: item.averageScore || 0,
+          totalTimeSpent: item.totalTimeSpent || 0,
+          rank: index + 1
         }))
         setLeaderboard(transformedData)
       } else {
@@ -105,7 +107,7 @@ function LeaderboardContent() {
     return `${minutes}m`
   }
 
-  const currentUserRank = leaderboard.findIndex(entry => entry.userId === user?.id) + 1
+  const currentUserRank = leaderboard.findIndex(entry => entry._id === user?.id) + 1
 
   if (loading) {
     return (
@@ -159,13 +161,13 @@ function LeaderboardContent() {
                       <div>
                         <p className="font-semibold text-blue-900">You</p>
                         <p className="text-sm text-blue-700">
-                          {leaderboard[currentUserRank - 1]?.totalQuizzes} quizzes
+                          {leaderboard[currentUserRank - 1]?.totalAttempts || 0} attempts
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-blue-900">
-                        {leaderboard[currentUserRank - 1]?.averageScore}%
+                        {leaderboard[currentUserRank - 1]?.averageScore || 0}%
                       </p>
                       <p className="text-sm text-blue-700">Average Score</p>
                     </div>
@@ -190,19 +192,19 @@ function LeaderboardContent() {
                   <div className="text-center py-12">
                     <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 mb-4">No leaderboard data available yet</p>
-                    <Button onClick={() => router.push('/dashboard/simple')}>
+                    <Button onClick={() => router.push('/dashboard')}>
                       Take Your First Quiz
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {leaderboard.slice(0, 20).map((entry, index) => {
-                      const isCurrentUser = entry.userId === user?.id
-                      const rank = index + 1
+                      const isCurrentUser = entry._id === user?.id
+                      const rank = entry.rank
 
                       return (
                         <div
-                          key={entry.userId}
+                          key={entry._id}
                           className={`p-4 rounded-lg border transition-all duration-200 ${getRankStyle(rank, isCurrentUser)}`}
                         >
                           <div className="flex items-center justify-between">
@@ -231,28 +233,28 @@ function LeaderboardContent() {
                                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                                   <div className="flex items-center space-x-1">
                                     <Target className="h-3 w-3" />
-                                    <span>{entry.totalQuizzes} attempts</span>
+                                    <span>{entry.totalAttempts || 0} attempts</span>
                                   </div>
                                   <div className="flex items-center space-x-1">
                                     <Trophy className="h-3 w-3" />
-                                    <span>Best: {entry.totalPoints}%</span>
+                                    <span>Best: {entry.bestScore || 0}%</span>
                                   </div>
                                   <div className="flex items-center space-x-1">
                                     <Clock className="h-3 w-3" />
-                                    <span>{formatTime(entry.totalPoints)}</span>
+                                    <span>{formatTime(entry.totalTimeSpent || 0)}</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
 
                             <div className="text-right">
-                              <div className={`text-2xl font-bold ${entry.averageScore >= 90 ? 'text-green-600' :
-                                  entry.averageScore >= 75 ? 'text-blue-600' :
-                                    entry.averageScore >= 60 ? 'text-yellow-600' : 'text-red-600'
+                              <div className={`text-2xl font-bold ${(entry.bestScore || 0) >= 90 ? 'text-green-600' :
+                                  (entry.bestScore || 0) >= 75 ? 'text-blue-600' :
+                                    (entry.bestScore || 0) >= 60 ? 'text-yellow-600' : 'text-red-600'
                                 }`}>
-                                {entry.averageScore}%
+                                {entry.bestScore || 0}%
                               </div>
-                              <p className="text-sm text-gray-600">Average</p>
+                              <p className="text-sm text-gray-600">Best Score</p>
                             </div>
                           </div>
                         </div>
