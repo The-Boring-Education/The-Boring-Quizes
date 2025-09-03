@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ClientAuth } from '@/components/ClientAuth'
+import { GamificationWrapper } from '@/components/GamificationWrapper'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from 'sonner'
 import './globals.css'
@@ -49,9 +50,11 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <ClientAuth>
-              <div className="min-h-screen bg-background text-foreground">
-                {children}
-              </div>
+              <GamificationWrapper>
+                <div className="min-h-screen bg-background text-foreground">
+                  {children}
+                </div>
+              </GamificationWrapper>
             </ClientAuth>
             <Toaster />
             <Sonner />

@@ -1,6 +1,6 @@
 import { apiClient, APIError } from "./base"
 import { API_ENDPOINTS } from "@/config"
-import { APIResponse, QuizCategoryAPI, QuizQuestionsData, QuizAttempt, PerformanceMetrics, CategoryPerformance, PerformanceHistory, LeaderboardData, UserProfile } from "@/types/api"
+import { APIResponse, QuizCategoryAPI, QuizQuestionsData, QuizAttempt, PerformanceMetrics, CategoryPerformance, PerformanceHistory, LeaderboardData, UserProfile, UserPoints } from "@/types/api"
 
 // User APIs
 export const userApi = {
@@ -264,5 +264,43 @@ export const userProfileApi = {
         }
     }
 }
+
+// Gamification APIs
+export const gamificationApi = {
+    getuserGamificationPoints:async(userId:string):Promise<APIResponse<any>> => {
+        try {
+            const response = await apiClient.get<APIResponse<UserPoints>>(API_ENDPOINTS.GAMIFICATION_USER_POINTS, {
+                params: { userId }
+            })
+
+            console.log(response.data.points)
+            return response
+        } catch (error) {
+            console.error("Error fetching user gamification points:", error)
+            throw error
+        }
+    },
+
+    updateuserGamificationPoints:async(data:{
+        userId:string
+        actionType:string
+    }):Promise<APIResponse<any>> => {
+
+        try {
+            // Build URL with userId as query parameter
+            const url = `${API_ENDPOINTS.GAMIFICATION_USER_POINTS}?userId=${data.userId}`
+            
+            const response = await apiClient.post<APIResponse<UserPoints>>(url, {
+                actionType: data.actionType
+            })
+            
+            return response
+        } catch (error) {
+            console.error("Error updating user gamification points:", error)
+            throw error
+        }
+    }
+}
+
 
 export { apiClient, APIError }

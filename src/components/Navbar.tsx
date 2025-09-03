@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
+import { PointsDisplay } from '@/components/PointsDisplay'
 
 export function Navbar() {
     const { user, signOut } = useAuth()
@@ -98,6 +99,11 @@ export function Navbar() {
                                 </Button>
                             ))}
                         </nav>
+                    )}
+
+                    {/* Points Display */}
+                    {user && (
+                        <PointsDisplay userId={user.id} variant="navbar" />
                     )}
 
                     {/* User Menu */}
