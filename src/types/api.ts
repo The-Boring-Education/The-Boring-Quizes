@@ -80,15 +80,24 @@ export interface QuizQuestionsData {
 // Enhanced Analytics Types
 export interface PerformanceMetrics {
     totalAttempts: number
-    totalScore: number
+    totalQuizzes: number
     averageScore: number
     bestScore: number
     totalTimeSpent: number
-    averageTimePerQuiz: number
-    accuracyRate: number
-    improvementRate: number
-    streakDays: number
-    lastActiveDate: string
+    categoryBreakdown: Array<{
+        categoryName: string
+        attempts: number
+        averageScore: number
+        bestScore: number
+    }>
+    recentAttempts: Array<{
+        _id: string
+        quizId: string
+        categoryName: string
+        score: number
+        completedAt: string
+        totalTimeSpent: number
+    }>
 }
 
 export interface CategoryPerformance {
@@ -111,15 +120,13 @@ export interface PerformanceHistory {
 }
 
 export interface LeaderboardData {
-    rank: number
-    userId: string
-    userName: string
-    userImage?: string
-    totalPoints: number
-    totalQuizzes: number
+    _id: string
+    username: string
+    image: string
+    bestScore: number
+    totalAttempts: number
     averageScore: number
-    streakDays: number
-    achievements: string[]
+    totalTimeSpent: number
 }
 
 export interface Achievement {

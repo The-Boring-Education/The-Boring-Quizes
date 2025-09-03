@@ -69,9 +69,14 @@ export function Navbar() {
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
                             <Brain className="w-5 h-5 text-white" />
                         </div>
-                        <h1 className="text-xl font-bold text-gray-900">
-                            The Boring Quizes
-                        </h1>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">
+                                The Boring Quizes
+                            </h1>
+                            <p className="text-xs text-black">
+                                By The Boring Education
+                            </p>
+                        </div>
                     </div>
 
                     {/* Navigation Links */}
