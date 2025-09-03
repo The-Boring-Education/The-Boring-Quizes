@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
+import { PointsDisplay } from '@/components/PointsDisplay'
 
 
 
@@ -19,7 +20,6 @@ export function DashboardNav() {
     const router = useRouter()
     const { toast } = useToast()
     const [showUserMenu, setShowUserMenu] = useState(false)
-
     const [loading, setLoading] = useState(false)
 
     const handleSignOut = async () => {
@@ -68,7 +68,8 @@ export function DashboardNav() {
                         </div>
                     </div>
 
-
+                    {/* Points Display */}
+                    <PointsDisplay userId={user?.id} variant="dashboard" />
 
                     {/* User Menu */}
                     <div className="flex items-center space-x-4">

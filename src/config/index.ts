@@ -30,5 +30,9 @@ export const API_ENDPOINTS = {
 
     // Legacy gamification endpoints (if needed)
     GAMIFICATION_LEADERBOARD: "/gamification/leaderboard",
-    USER_RANK: "/gamification/user-rank"
+    USER_RANK: "/gamification/user-rank",
+
+    // Gamification endpoints
+    GAMIFICATION_USER_POINTS: "/gamification",
+
 }

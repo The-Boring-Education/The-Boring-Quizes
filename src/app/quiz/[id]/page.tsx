@@ -12,6 +12,7 @@ import { quizApi } from "@/services/quizApi"
 import { quizApi as mainQuizApi } from "@/services/api"
 import { getValidUserId } from "@/lib/utils"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
+import useGamifiedAction from "@/hooks/useGamifiedAction"
 
 interface QuizQuestion {
   question: string
@@ -34,6 +35,7 @@ function QuizContent() {
   const router = useRouter()
   const { user } = useAuth()
   const quizId = params.id as string
+  const gamifiedAction = useGamifiedAction()
 
   const [quiz, setQuiz] = useState<QuizCategory | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -100,7 +102,9 @@ function QuizContent() {
   }
 
   const completeQuiz = async () => {
-    if (!quiz || !user?.id) return
+    if (!quiz || !user?.id) {
+      return
+    }
 
     try {
       const totalTimeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
@@ -138,6 +142,18 @@ function QuizContent() {
       if (response && typeof response === 'object' && 'success' in response && response.success && 'data' in response) {
         setResult(response.data)
         setGameState('completed')
+        
+        // Trigger gamification action for completing quiz
+        await gamifiedAction.triggerGamifiedAction({
+          actionType: 'COMPLETE_QUIZ',
+          customMessage: 'Quiz completed! Great job!',
+          metadata: {
+            quizId,
+            totalTimeSpent,
+            correctAnswers: answers.filter(a => a.isCorrect).length,
+            totalQuestions: answers.length
+          }
+        })
       } else {
         const message = response && typeof response === 'object' && 'message' in response && typeof response.message === 'string' 
           ? response.message 
