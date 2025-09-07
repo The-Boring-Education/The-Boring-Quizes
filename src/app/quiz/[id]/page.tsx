@@ -79,6 +79,33 @@ function QuizContent() {
     }))
   }
 
+  // Function to render question dynamically with code blocks
+  const renderQuestion = (question: string) => {
+    const parts = question.split(/```(?:jsx|js|tsx)?\n?/g);
+  
+    return parts.map((part, idx) => {
+      if (!part) return null; 
+  
+      if (idx % 2 === 1) {
+        // code block
+        return (
+          <pre
+            key={idx}
+            className="bg-gray-900 text-green-300 p-4 rounded-lg overflow-x-auto my-2"
+          >
+            <code>{part.trim()}</code>
+          </pre>
+        );
+      } else {
+        // normal text
+        return (
+          <span key={idx} className="whitespace-pre-wrap">
+            {part}
+          </span>
+        );
+      }
+    });
+  };
   const nextQuestion = () => {
     // Record time spent on current question
     const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000)
@@ -273,9 +300,9 @@ function QuizContent() {
           <div className="max-w-4xl mx-auto">
             <Card className="shadow-lg">
               <CardHeader className="bg-white">
-                <CardTitle className="text-2xl leading-relaxed text-gray-900">
-                  {currentQuestion.question}
-                </CardTitle>
+              <CardTitle className="text-2xl leading-relaxed text-gray-900 whitespace-pre-wrap">
+  {renderQuestion(currentQuestion.question)}
+</CardTitle>
               </CardHeader>
               
               <CardContent className="bg-white p-8 space-y-6">
