@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Layout } from "@/components/Layout"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { CodeRenderer } from "@/components/common/CodeRenderer"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi } from "@/services/quizApi"
 import { quizApi as mainQuizApi } from "@/services/api"
 import { getValidUserId } from "@/lib/utils"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
 import useGamifiedAction from "@/hooks/useGamifiedAction"
+
 
 interface QuizQuestion {
   question: string
@@ -70,7 +72,7 @@ function QuizContent() {
     } catch (error) {
       alert('Failed to load quiz. Please try again.')
     }
-  }
+  } 
 
   const selectAnswer = (answerIndex: number) => {
     if (showExplanation) return
@@ -289,9 +291,9 @@ function QuizContent() {
           <div className="max-w-4xl mx-auto">
             <Card className="shadow-lg">
               <CardHeader className="bg-white">
-                <CardTitle className="text-2xl leading-relaxed text-gray-900">
-                  {currentQuestion.question}
-                </CardTitle>
+                <div className="text-2xl leading-relaxed text-gray-900">
+                  <CodeRenderer content={currentQuestion.question} />
+                </div>
               </CardHeader>
               
               <CardContent className="bg-white p-8 space-y-6">
@@ -327,7 +329,9 @@ function QuizContent() {
                         {String.fromCharCode(65 + index)}
                       </div>
                       
-                      <span className="flex-1 text-lg">{option}</span>
+                      <div className="flex-1 text-lg">
+                        <CodeRenderer content={option} />
+                      </div>
                       
                       {showExplanation && (
                         <div className="ml-auto">
@@ -363,7 +367,9 @@ function QuizContent() {
                       </span>
                     </div>
                     
-                    <p className="text-gray-700 text-lg">{currentQuestion.explanation}</p>
+                    <div className="text-gray-700 text-lg">
+                      <CodeRenderer content={currentQuestion.explanation} />
+                    </div>
                   </div>
                 )}
                 
