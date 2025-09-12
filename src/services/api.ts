@@ -110,7 +110,8 @@ export const quizApi = {
     // Get 10 questions for a quiz (simplified)
     getQuestions: async (id: string): Promise<APIResponse<QuizQuestionsData>> => {
         try {
-            return await apiClient.get<APIResponse<QuizQuestionsData>>(API_ENDPOINTS.QUIZ_QUESTIONS(id))
+            // Add query parameters to ensure consistent ordering
+            return await apiClient.get<APIResponse<QuizQuestionsData>>(`${API_ENDPOINTS.QUIZ_QUESTIONS(id)}?shuffle=false&random=false&sort=original`)
         } catch (error) {
             console.error("Error fetching quiz questions:", error)
             throw error

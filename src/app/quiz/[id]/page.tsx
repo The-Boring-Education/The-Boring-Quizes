@@ -9,20 +9,11 @@ import { Layout } from "@/components/Layout"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { CodeRenderer } from "@/components/common/CodeRenderer"
 import { useAuth } from "@/contexts/AuthContext"
-import { quizApi } from "@/services/quizApi"
-import { quizApi as mainQuizApi } from "@/services/api"
+import { quizApi } from "@/services/api"
 import { getValidUserId } from "@/lib/utils"
 import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
 import useGamifiedAction from "@/hooks/useGamifiedAction"
-
-
-interface QuizQuestion {
-  question: string
-  options: string[]
-  correctAnswer: number
-  explanation: string
-  detailedExplanation: string
-}
+import { QuizQuestion } from "@/types/api"
 
 interface QuizCategory {
   _id: string
@@ -31,6 +22,7 @@ interface QuizCategory {
   categoryIcon: string
   questions: QuizQuestion[]
 }
+
 
 function QuizContent() {
   const params = useParams()
@@ -138,7 +130,7 @@ function QuizContent() {
         totalTimeSpent
       }
 
-      const response = await mainQuizApi.submitQuiz(quizId, submission)
+      const response = await quizApi.submitQuiz(quizId, submission)
       
       // Type guard to check if response has the expected structure
       if (response && typeof response === 'object' && 'success' in response && response.success && 'data' in response) {
