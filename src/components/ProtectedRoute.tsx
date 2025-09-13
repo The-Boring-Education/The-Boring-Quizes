@@ -1,89 +1,122 @@
-import { ReactNode, useEffect, useState } from "react"
-import { Navigate, useLocation, useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/AuthContext"
+'use client'
+
+import React, { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
+import { config } from "@/config"
+import { getValidUserId } from "@/lib/utils"
 
 interface ProtectedRouteProps {
-    children: ReactNode
+    children: React.ReactNode
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { user, loading, refreshUserFromBackend } = useAuth()
-    const location = useLocation()
-    const navigate = useNavigate()
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
     const [hasRefreshed, setHasRefreshed] = useState(false)
     const [refreshingUser, setRefreshingUser] = useState(false)
+    const [redirectingToOnboarding, setRedirectingToOnboarding] = useState(false)
+    const [isProcessingOnboarding, setIsProcessingOnboarding] = useState(false)
 
-    const params = new URLSearchParams(location.search)
-    const cameFromOnboarding = params.get("onboardingComplete") === "true"
+    const cameFromOnboarding = searchParams.get("onboardingComplete") === "true"
 
-    // 👇 Handle onboarding redirection and refresh logic
+    // Handle onboarding redirection and refresh logic
     useEffect(() => {
         if (!loading && user) {
+            // Handle onboarding completion
             if (cameFromOnboarding && !hasRefreshed) {
                 setRefreshingUser(true)
-
-                refreshUserFromBackend?.()
-                    .then(() => {
-                        console.log("User refreshed.")
-                    })
-                    .catch((err) => {
-                        console.error(" Failed to refresh user:", err)
-                    })
-                    .finally(() => {
+                
+                const refreshUserData = async () => {
+                    if (isProcessingOnboarding) return
+                    
+                    setIsProcessingOnboarding(true)
+                    try {
+                        await refreshUserFromBackend?.()
+                    } catch (err) {
+                        // Failed to refresh user after onboarding
+                    } finally {
                         setHasRefreshed(true)
                         setRefreshingUser(false)
+                        setIsProcessingOnboarding(false)
+                    }
+                }
+
+                refreshUserData()
+                return
+            }
+
+            // Check if user needs onboarding
+            if (user.isOnboarded === false || user.isOnboarded === undefined) {
+                // Only redirect if we haven't just come from onboarding
+                if (!cameFromOnboarding) {
+                    const validUserId = getValidUserId(user)
+                    if (!validUserId) {
+                        // If user object is incomplete, redirect to login to re-authenticate
+                        router.push('/login')
+                        return
+                    }
+                    
+                    setRedirectingToOnboarding(true)
+                    
+                    if (!config.ONBOARDING_APP_URL) {
+                        // ONBOARDING_APP_URL is not set in config
+                        router.push('/login')
+                        return
+                    }
+                    
+                    const redirectParams = new URLSearchParams({
+                        userId: validUserId,
+                        from: "quizapp",
+                        redirect: `${window.location.origin}/dashboard?onboardingComplete=true`
                     })
 
-                return
-            }
-
-            if (user.isOnboarded && location.pathname === "/onboarding") {
-                navigate("/dashboard", { replace: true })
-                return
-            }
-
-            if (!user.isOnboarded && location.pathname !== "/onboarding") {
-                const redirectParams = new URLSearchParams({
-                    userId: user.id,
-                    from: "quizapp",
-                    redirect: `${window.location.origin}/dashboard?onboardingComplete=true`
-                })
-
-                const onboardingURL = `${
-                    import.meta.env.VITE_ONBOARDING_APP_URL
-                }/?${redirectParams.toString()}`
-                window.location.href = onboardingURL
-                return
+                    const onboardingURL = `${config.ONBOARDING_APP_URL}/?${redirectParams.toString()}`
+                    
+                    setTimeout(() => {
+                        window.location.href = onboardingURL
+                    }, 100)
+                    return
+                }
             }
         }
     }, [
         user,
         loading,
-        location.pathname,
         hasRefreshed,
         cameFromOnboarding,
-        navigate
+        router,
+        isProcessingOnboarding,
+        refreshUserFromBackend
     ])
 
-    if (loading || refreshingUser) {
+    // Show loading state while redirecting to onboarding
+    if (redirectingToOnboarding) {
         return (
             <div className='min-h-screen flex items-center justify-center'>
-                <div className='text-2xl font-semibold'>Loading...</div>
+                <div className='text-2xl font-semibold'>Redirecting to onboarding...</div>
             </div>
         )
     }
 
-    if (!user) {
-        return <Navigate to='/login' replace />
+    // Show loading state while refreshing user data
+    if (refreshingUser) {
+        return (
+            <div className='min-h-screen flex items-center justify-center'>
+                <div className='text-2xl font-semibold'>Refreshing user data...</div>
+            </div>
+        )
     }
 
-    if (cameFromOnboarding && !hasRefreshed) {
-        return null
-    }
-
-    if (!user.isOnboarded && location.pathname !== "/onboarding") {
-        return null
+    // If user needs onboarding, show loading while redirecting
+    if (user && (user.isOnboarded === false || user.isOnboarded === undefined) && !cameFromOnboarding) {
+        return (
+            <div className='min-h-screen flex items-center justify-center'>
+                <div className='text-2xl font-semibold'>Redirecting to onboarding...</div>
+            </div>
+        )
     }
 
     return <>{children}</>

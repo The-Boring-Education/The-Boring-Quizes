@@ -1,147 +1,309 @@
-# The Boring Quizes
+# The Boring Quizes 🧠
 
-A quiz application built with React, TypeScript, and Vite that integrates with The Boring Education webapp APIs.
+A comprehensive quiz platform for mastering tech interviews with detailed analytics, performance tracking, and competitive leaderboards.
 
-## Features
+## ✨ Features
 
--   **Standalone Google OAuth**: Independent authentication system
--   **User Onboarding**: Custom onboarding flow to collect user preferences
--   **Quiz Categories**: Dynamic loading of quiz categories from TBE webapp
--   **Interactive Quizzes**: Timed questions with instant feedback
--   **MDX Support**: Rich text rendering with code syntax highlighting for questions and answers
--   **User Profile**: View and manage user information
--   **Proper Routing**: Clean URL structure with React Router
--   **TBE Webapp Integration**: Full integration with TBE webapp APIs
+### 🎯 Core Quiz System
 
-## Architecture
+-   **Multiple Categories**: JavaScript, React, Algorithms, Web Development, and more
+-   **Interactive Questions**: Multiple choice with detailed explanations
+-   **Real-time Scoring**: Immediate feedback and performance tracking
+-   **Progress Tracking**: Save attempts and track improvement over time
 
-This app follows the same pattern as other TBE apps (like Prep Yatra):
+### 📊 Enhanced Dashboard
 
--   Handles its own Google OAuth authentication
--   Communicates with TBE webapp APIs for user management
--   Has its own onboarding flow
--   Stores user data locally while syncing with TBE backend
--   Uses React Router for proper page navigation
+-   **Unified Navigation**: Clean, intuitive navigation across all features
+-   **Quick Stats**: Overview of total attempts, average scores, and time spent
+-   **Category Progress**: Visual progress indicators for each quiz category
+-   **Performance Insights**: Detailed analytics and improvement tracking
 
-## Setup
+### 📈 Stats & Analytics
 
-1. **Install dependencies**:
+-   **Performance Metrics**: Comprehensive performance overview
+-   **Time Range Filtering**: 7 days, 30 days, 90 days, or all time
+-   **Category Performance**: Detailed breakdown by quiz category
+-   **Trend Analysis**: Performance improvement tracking and insights
+-   **Accuracy Metrics**: Time management and accuracy statistics
+
+### 📚 Performance History
+
+-   **Detailed Attempt Tracking**: Complete history of all quiz attempts
+-   **Advanced Filtering**: Search by category, time range, and keywords
+-   **Performance Trends**: Compare recent vs. previous performance
+-   **Detailed Insights**: Expandable attempt details with metrics
+-   **Export & Analysis**: Comprehensive performance data for review
+
+### 🏆 Leaderboard & Competition
+
+-   **Global Rankings**: Compete with learners worldwide
+-   **Achievement System**: Unlock badges and rewards
+-   **User Profiles**: View detailed profiles and achievements
+-   **Ranking Tiers**: Top 25, 50, or 100 learners
+-   **Personal Ranking**: Track your position globally
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+-   Node.js 18+
+-   npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+    ```bash
+    git clone <repository-url>
+    cd The-Boring-Quizes
+    ```
+
+2. **Install dependencies**
 
     ```bash
     npm install
+    # or
+    yarn install
     ```
 
-2. **Environment Configuration**:
-   Create a `.env` file in the root directory:
+3. **Environment Setup**
+
+    ```bash
+    cp .env.example .env.local
+    ```
+
+    Update `.env.local` with your configuration:
 
     ```env
-    VITE_TBE_WEBAPP_API_URL=http://localhost:3000
-    VITE_GOOGLE_CLIENT_ID=your-google-client-id
+    NEXT_PUBLIC_TBE_WEBAPP_API_URL=your_api_url
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
     ```
 
-3. **Run the application**:
+4. **Run Development Server**
+
     ```bash
     npm run dev
+    # or
+    yarn dev
     ```
 
-## TBE Webapp Setup
+    Open [http://localhost:3002](http://localhost:3002) in your browser.
 
-Make sure the TBE webapp is running and has the following:
+### Production Build
 
-1. CORS configured to allow requests from `http://localhost:5173`
-2. The quiz API endpoints available at `/quiz/*`
-3. User management endpoints at `/user/*`
+```bash
+npm run build
+npm start
+```
 
-## User Flow
+## 🏗️ Architecture
 
-1. User lands on the app and sees the landing page (`/`)
-2. Clicking "Get Started" prompts for Google sign-in (`/login`)
-3. After authentication, new users go through onboarding (`/onboarding`):
-    - Choose username
-    - Select occupation
-    - Select purposes for using the app
-4. Once onboarded, users can access the dashboard (`/dashboard`):
-    - Select quiz categories
-    - View user profile and stats
-5. Taking quizzes (`/quiz/:categoryId`):
-    - Timed questions with progress tracking
-    - Real-time feedback
-6. Viewing results (`/results/:categoryId`):
-    - Detailed score breakdown
-    - Question-by-question review
-    - Submit results to TBE webapp
+### Frontend Structure
 
-## API Integration
+```
+src/
+├── app/                    # Next.js app router
+│   ├── dashboard/         # Dashboard pages
+│   │   ├── page.tsx      # Main dashboard
+│   │   ├── stats/        # Stats & Analytics
+│   │   ├── history/      # Performance History
+│   │   └── leaderboard/  # Leaderboard
+│   └── quiz/             # Quiz taking interface
+├── components/            # Reusable components
+│   ├── layout/           # Layout components
+│   │   └── DashboardNav.tsx
+│   └── ui/               # UI components
+├── services/             # API services
+├── types/                # TypeScript types
+└── lib/                  # Utilities and helpers
+```
 
-The app integrates with TBE webapp through these endpoints:
+### Key Components
+
+#### DashboardNav
+
+-   **Unified Navigation**: Consistent navigation across all dashboard pages
+-   **Responsive Design**: Mobile-friendly with collapsible menu
+-   **Active States**: Visual feedback for current page
+-   **User Management**: Profile menu and sign out functionality
+
+#### Stats & Analytics
+
+-   **Performance Metrics**: Key performance indicators
+-   **Time Range Filtering**: Flexible date range selection
+-   **Category Breakdown**: Performance by quiz category
+-   **Trend Analysis**: Improvement tracking over time
+
+#### Performance History
+
+-   **Attempt Tracking**: Complete history of quiz attempts
+-   **Advanced Filtering**: Search and filter capabilities
+-   **Performance Trends**: Comparative analysis
+-   **Detailed Insights**: Expandable attempt information
+
+#### Leaderboard
+
+-   **Global Rankings**: Worldwide competition
+-   **User Profiles**: Detailed user information
+-   **Achievement System**: Badges and rewards
+-   **Ranking Tiers**: Multiple leaderboard views
+
+## 🔧 API Integration
+
+### Endpoints
+
+-   **Quiz Management**: Categories, questions, and submissions
+-   **Analytics**: Performance metrics and category analysis
+-   **User Management**: Profiles, authentication, and preferences
+-   **Leaderboard**: Rankings and achievements
+
+### Data Flow
+
+1. **Quiz Attempts**: Track user performance and time
+2. **Analytics Processing**: Calculate metrics and trends
+3. **Leaderboard Updates**: Real-time ranking calculations
+4. **Achievement Unlocking**: Automatic badge assignment
+
+## 🎨 UI/UX Features
+
+### Design Principles
+
+-   **Clean & Modern**: Minimalist design with clear hierarchy
+-   **Responsive**: Mobile-first responsive design
+-   **Accessible**: WCAG compliant with proper contrast
+-   **Interactive**: Smooth animations and micro-interactions
+
+### Visual Elements
+
+-   **Glass Morphism**: Modern backdrop blur effects
+-   **Gradient Accents**: Subtle color gradients
+-   **Icon System**: Consistent Lucide React icons
+-   **Animation**: Smooth transitions and loading states
+
+## 📱 Responsive Design
+
+### Breakpoints
+
+-   **Mobile**: 320px - 768px
+-   **Tablet**: 768px - 1024px
+-   **Desktop**: 1024px+
+
+### Mobile Features
+
+-   **Collapsible Navigation**: Hamburger menu for mobile
+-   **Touch-Friendly**: Optimized for touch interactions
+-   **Adaptive Layouts**: Responsive grid systems
+-   **Mobile-First**: Designed for mobile devices first
+
+## 🚀 Performance
+
+### Optimization
+
+-   **React Query**: Efficient data fetching and caching
+-   **Code Splitting**: Lazy loading of components
+-   **Image Optimization**: Next.js image optimization
+-   **Bundle Analysis**: Optimized bundle sizes
+
+### Caching Strategy
+
+-   **Client-Side**: React Query cache management
+-   **Server-Side**: API response caching
+-   **Static Assets**: CDN optimization for static files
+
+## 🔒 Security
+
+### Authentication
+
+-   **Google OAuth**: Secure third-party authentication
+-   **JWT Tokens**: Secure session management
+-   **Protected Routes**: Route-level authentication
+-   **User Isolation**: Secure data separation
+
+### Data Protection
+
+-   **Input Validation**: Client and server-side validation
+-   **XSS Prevention**: Sanitized user inputs
+-   **CSRF Protection**: Cross-site request forgery prevention
+-   **Rate Limiting**: API abuse prevention
+
+## 🧪 Testing
+
+### Testing Strategy
+
+-   **Unit Tests**: Component and utility testing
+-   **Integration Tests**: API integration testing
+-   **E2E Tests**: End-to-end user flow testing
+-   **Performance Tests**: Load and stress testing
+
+### Test Commands
+
+```bash
+npm run test          # Run unit tests
+npm run test:e2e      # Run end-to-end tests
+npm run test:coverage # Generate coverage report
+```
+
+## 📈 Monitoring & Analytics
+
+<<<<<<< HEAD
 
 -   `POST /user` - Create/find user after Google auth
 -   `GET /user/onbording?userName={username}` - Check username availability
 -   `POST /user/onbording?userId={userId}` - Complete user onboarding
 -   `GET /quiz` - Get available quiz categories
 -   `GET /quiz/{categoryId}` - Get questions for a category
--   `POST /quiz/{categoryId}/attempt` - Submit quiz attempt
+-   # `POST /quiz/{categoryId}/attempt` - Submit quiz attempt
 
-## Routing Structure
+### Performance Monitoring
 
--   `/` - Landing page
--   `/login` - Google OAuth login
--   `/onboarding` - User onboarding flow (protected)
--   `/dashboard` - Main dashboard with quiz categories (protected)
--   `/quiz/:categoryId` - Take a quiz (protected)
--   `/results/:categoryId` - View quiz results (protected)
+-   **Core Web Vitals**: LCP, FID, CLS tracking
+-   **Error Tracking**: Sentry integration for error monitoring
+-   **User Analytics**: Google Analytics integration
+-   **Performance Metrics**: Real-time performance tracking
+    > > > > > > > eea263a45a6a795009639f422308aa2962dcf4cd
 
-## Development
+### User Behavior
 
--   Built with Vite for fast development
--   Uses React 18 with TypeScript
--   Styled with Tailwind CSS
--   Icons from Lucide React
--   React Router for navigation
--   TanStack Query for data fetching
--   Google OAuth for authentication
--   React Markdown with syntax highlighting for rich content
+-   **Quiz Completion Rates**: Track user engagement
+-   **Performance Trends**: Monitor learning progress
+-   **Feature Usage**: Understand user preferences
+-   **Conversion Funnel**: Optimize user journey
 
-## MDX Support
+## 🤝 Contributing
 
-The app now supports rich content rendering for quiz questions and answers:
+### Development Workflow
 
-### Features
+1. **Fork** the repository
+2. **Create** a feature branch
+3. **Make** your changes
+4. **Test** thoroughly
+5. **Submit** a pull request
 
--   **Code Syntax Highlighting**: Questions can include code snippets with proper syntax highlighting
--   **Markdown Formatting**: Support for **bold**, _italic_, `inline code`, lists, and more
--   **Code Blocks**: Multi-line code examples with language-specific highlighting
--   **Responsive Design**: Code blocks and content adapt to different screen sizes
+### Code Standards
 
-### Example Question Format
+-   **TypeScript**: Strict type checking
+-   **ESLint**: Code quality enforcement
+-   **Prettier**: Consistent code formatting
+-   **Conventional Commits**: Standardized commit messages
 
-````markdown
-Given the following React component:
+## 📄 License
 
-```jsx
-const Component = () => {
-    const [count, setCount] = useState(0)
-    return <div>{count}</div>
-}
-```
-````
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-What will happen when this component renders?
+## 🙏 Acknowledgments
 
-### Supported Languages
+-   **Next.js Team**: For the amazing React framework
+-   **Tailwind CSS**: For the utility-first CSS framework
+-   **Lucide Icons**: For the beautiful icon set
+-   **React Query**: For efficient data management
 
--   JavaScript/JSX
--   TypeScript/TSX
--   HTML/CSS
--   JSON
--   And many more via Prism.js
+## 📞 Support
 
-## Key Improvements
+-   **Documentation**: [Wiki](link-to-wiki)
+-   **Issues**: [GitHub Issues](link-to-issues)
+-   **Discussions**: [GitHub Discussions](link-to-discussions)
+-   **Email**: support@theboringquizes.com
 
-1. **Proper Routing**: Each page has its own route instead of all being on `/`
-2. **TBE Webapp Integration**: Full integration with TBE webapp APIs
-3. **Protected Routes**: Authentication and onboarding checks
-4. **Better UX**: Clean navigation and user flow
-5. **API Integration**: Real-time data from TBE webapp
-6. **Type Safety**: Proper TypeScript interfaces for all API calls
-7. **MDX Support**: Rich content rendering with syntax highlighting
+---
+
+**Built with ❤️ by The Boring Team**

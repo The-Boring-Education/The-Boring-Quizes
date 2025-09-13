@@ -1,12 +1,12 @@
 export interface Question {
-  id: number;
+  id: number | string;
   question: string;
   options: string[];
   correctAnswer: number;
   explanation: string;
   detailedExplanation: string;
   category: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: string;
 }
 
 export interface QuizCategory {
