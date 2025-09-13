@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
+import { PointsDisplay } from '@/components/PointsDisplay'
 
 export function Navbar() {
     const { user, signOut } = useAuth()
@@ -69,9 +70,14 @@ export function Navbar() {
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
                             <Brain className="w-5 h-5 text-white" />
                         </div>
-                        <h1 className="text-xl font-bold text-gray-900">
-                            The Boring Quizes
-                        </h1>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">
+                                The Boring Quizes
+                            </h1>
+                            <p className="text-xs text-black">
+                                By The Boring Education
+                            </p>
+                        </div>
                     </div>
 
                     {/* Navigation Links */}
@@ -93,6 +99,11 @@ export function Navbar() {
                                 </Button>
                             ))}
                         </nav>
+                    )}
+
+                    {/* Points Display */}
+                    {user && (
+                        <PointsDisplay userId={user.id} variant="navbar" />
                     )}
 
                     {/* User Menu */}
