@@ -1,400 +1,331 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Layout } from "@/components/Layout"
-import { ProtectedRoute } from "@/components/ProtectedRoute"
-import { CodeRenderer } from "@/components/common/CodeRenderer"
+import { useEffect, useRef, useMemo, useState } from "react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/contexts/AuthContext"
 import { quizApi } from "@/services/api"
-import { getValidUserId } from "@/lib/utils"
-import { Clock, CheckCircle, XCircle, Trophy } from "lucide-react"
-import useGamifiedAction from "@/hooks/useGamifiedAction"
-import { QuizQuestion } from "@/types/api"
+import { Question } from "@/types/quiz"
+import { ArrowLeft, Trophy, Clock, Target } from "lucide-react"
+import { MarkdownRenderer } from "@/components/common/MarkdownRenderer"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { trackEvent } from "@/lib/analytics"
 
-interface QuizCategory {
-  _id: string
-  categoryName: string
-  categoryDescription: string
-  categoryIcon: string
-  questions: QuizQuestion[]
+interface QuizQuestion {
+  _id?: string
+  question: string
+  options: string[]
+  correctAnswer: number
+  explanation: string
+  detailedExplanation?: string
+  difficulty?: string
 }
 
-
-function QuizContent() {
+function ResultsContent() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
-  const quizId = params.id as string
-  const gamifiedAction = useGamifiedAction()
 
-  const [quiz, setQuiz] = useState<QuizCategory | null>(null)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({})
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now())
-  const [questionTimes, setQuestionTimes] = useState<{ [key: number]: number }>({})
-  const [gameState, setGameState] = useState<'loading' | 'playing' | 'completed'>('loading')
-  const [showExplanation, setShowExplanation] = useState(false)
-  const [quizStartTime] = useState(Date.now())
-  const [result, setResult] = useState<any>(null)
+  const id = params.id as string
+  const answersParam = searchParams.get('answers')
+  const timeTakenParam = searchParams.get('timeTaken')
+
+  const answers: (number | null)[] = useMemo(
+    () => (answersParam ? JSON.parse(answersParam) : []),
+    [answersParam]
+  )
+  const timeTaken = timeTakenParam ? parseInt(timeTakenParam) : 0
+
+  // Fetch quiz data
+  const {
+    data: quizData,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ["quiz", id],
+    queryFn: () => quizApi.getQuestions(id!),
+    enabled: !!id
+  })
+
+  const questions: Question[] =
+    quizData?.data?.questions?.map((q: QuizQuestion) => ({
+      id: q._id || Math.random(),
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation,
+      detailedExplanation: q.detailedExplanation || q.explanation,
+      category: quizData?.data?.categoryName || "",
+      difficulty: q.difficulty || "medium"
+    })) || []
+
+  // Score
+  const [calculatedScore, setCalculatedScore] = useState(0)
 
   useEffect(() => {
-    loadQuiz()
-  }, [quizId])
-
-  useEffect(() => {
-    if (gameState === 'playing') {
-      setQuestionStartTime(Date.now())
-    }
-  }, [currentQuestionIndex, gameState])
-
-  const loadQuiz = async () => {
-    try {
-      const response = await quizApi.getQuestions(quizId)
-      
-      if (response.success) {
-        setQuiz(response.data)
-        setGameState('playing')
-      } else {
-        throw new Error(response.message || 'Failed to load quiz')
-      }
-    } catch (error) {
-      alert('Failed to load quiz. Please try again.')
-    }
-  } 
-
-  const selectAnswer = (answerIndex: number) => {
-    if (showExplanation) return
-    
-    setSelectedAnswers(prev => ({
-      ...prev,
-      [currentQuestionIndex]: answerIndex
-    }))
-  }
-
-  const nextQuestion = () => {
-    // Record time spent on current question
-    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000)
-    setQuestionTimes(prev => ({
-      ...prev,
-      [currentQuestionIndex]: timeSpent
-    }))
-
-    if (showExplanation) {
-      setShowExplanation(false)
-      if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
-        setCurrentQuestionIndex(prev => prev + 1)
-      } else {
-        completeQuiz()
-      }
-    } else {
-      setShowExplanation(true)
-    }
-  }
-
-  const completeQuiz = async () => {
-    if (!quiz || !user?.id) {
-      return
-    }
-
-    try {
-      const totalTimeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
-      
-      const answers = quiz.questions.map((question, index) => {
-        const selectedAnswer = selectedAnswers[index] ?? -1
-        const isCorrect = selectedAnswer === question.correctAnswer
-        const timeSpent = questionTimes[index] || 0
-        
-        return {
-          questionIndex: index,
-          selectedAnswer,
-          isCorrect,
-          timeSpent
+    if (questions.length > 0 && answers.length > 0) {
+      const newScore = answers.reduce((acc: number, answer, index) => {
+        if (index < questions.length && answer !== null) {
+          return acc + (answer === questions[index]?.correctAnswer ? 1 : 0)
         }
+        return acc
+      }, 0)
+      setCalculatedScore(newScore)
+    }
+  }, [questions, answers])
+
+  // Analytics
+  useEffect(() => {
+    try {
+      trackEvent("quiz_results_view", {
+        category: "quiz",
+        quizId: id,
+        timeTaken,
+        answeredCount: answers.filter((a) => a !== null).length
       })
+    } catch {}
+  }, [id, timeTaken, answers])
 
-      // Ensure user has a valid ID before submitting
-      const validUserId = getValidUserId(user)
-      if (!validUserId) {
-        alert('User authentication error. Please try logging in again.')
-        router.push('/login')
+  // Submit results to API
+  const hasSubmittedRef = useRef(false)
+
+  useEffect(() => {
+    const submitResults = async () => {
+      if (
+        hasSubmittedRef.current ||
+        !user?.id ||
+        !id ||
+        answers.length === 0
+      )
         return
-      }
 
-      const submission = {
-        userId: validUserId,
-        answers,
-        totalTimeSpent
-      }
+      hasSubmittedRef.current = true
 
-      const response = await quizApi.submitQuiz(quizId, submission)
-      
-      // Type guard to check if response has the expected structure
-      if (response && typeof response === 'object' && 'success' in response && response.success && 'data' in response) {
-        setResult(response.data)
-        setGameState('completed')
-        
-        // Trigger gamification action for completing quiz
-        await gamifiedAction.triggerGamifiedAction({
-          actionType: 'COMPLETE_QUIZ',
-          customMessage: 'Quiz completed! Great job!',
-          metadata: {
-            quizId,
-            totalTimeSpent,
-            correctAnswers: answers.filter(a => a.isCorrect).length,
-            totalQuestions: answers.length
-          }
+      try {
+        const answersArray = answers.map((answer) => answer ?? -1)
+
+        if (!user.id) {
+          alert('User authentication error. Please try logging in again.')
+          router.push('/login')
+          return
+        }
+
+        await quizApi.submitAttempt(id, {
+          userId: user.id,
+          answers: answersArray,
+          timeTaken
         })
-      } else {
-        const message = response && typeof response === 'object' && 'message' in response && typeof response.message === 'string' 
-          ? response.message 
-          : 'Failed to submit quiz'
-        throw new Error(message)
+      } catch (error) {
+        hasSubmittedRef.current = false
       }
-          } catch (error) {
-        alert('Failed to submit quiz. Please try again.')
-      }
-  }
+    }
 
-  const restartQuiz = () => {
-    setCurrentQuestionIndex(0)
-    setSelectedAnswers({})
-    setQuestionTimes({})
-    setShowExplanation(false)
-    setResult(null)
-    loadQuiz()
-  }
+    submitResults()
+  }, [user?.id, id, answers, timeTaken, router])
 
-  if (gameState === 'loading') {
+  const totalQuestions = questions.length
+  const percentage = totalQuestions > 0 ? Math.round((calculatedScore / totalQuestions) * 100) : 0
+
+  if (isLoading) {
     return (
-      <Layout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-lg text-gray-600">Loading quiz...</p>
-          </div>
-        </div>
-      </Layout>
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-2xl font-semibold'>Loading results...</div>
+      </div>
     )
   }
 
-  if (gameState === 'completed' && result) {
+  if (error || questions.length === 0) {
     return (
-      <Layout>
-        <div className="min-h-screen bg-gray-50">
-          <div className="container mx-auto px-4 py-12">
-            <div className="max-w-2xl mx-auto">
-              <Card className="shadow-lg">
-                <CardContent className="p-12 text-center">
-                  <Trophy className="h-20 w-20 text-yellow-500 mx-auto mb-6" />
-                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Quiz Completed!</h2>
-                  <p className="text-xl text-gray-600 mb-8">Great job finishing the quiz</p>
-                  
-                  <div className="grid grid-cols-2 gap-6 mb-8">
-                    <div className="bg-green-50 p-6 rounded-lg">
-                      <div className="text-3xl font-bold text-green-600">{result.score}%</div>
-                      <div className="text-gray-600">Score</div>
-                    </div>
-                    <div className="bg-blue-50 p-6 rounded-lg">
-                      <div className="text-3xl font-bold text-blue-600">
-                        {result.correctAnswers}/{result.totalQuestions}
-                      </div>
-                      <div className="text-gray-600">Correct</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-center space-x-2 mb-8 text-gray-600">
-                    <Clock className="h-5 w-5" />
-                    <span className="text-lg">{Math.floor(result.totalTimeSpent / 60)}m {result.totalTimeSpent % 60}s</span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <Button
-                      onClick={restartQuiz}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700"
-                      size="lg"
-                    >
-                      Take Quiz Again
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push('/dashboard')}
-                      className="w-full border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-                      size="lg"
-                    >
-                      Back to Dashboard
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      onClick={() => router.push('/performance')}
-                      className="w-full text-indigo-600 hover:bg-indigo-50"
-                      size="lg"
-                    >
-                      View Performance
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-2xl font-semibold text-red-600'>
+          Failed to load results. Please try again.
         </div>
-      </Layout>
+      </div>
     )
   }
-
-  if (!quiz || gameState !== 'playing') {
-    return null
-  }
-
-  const currentQuestion = quiz.questions[currentQuestionIndex]
-  const selectedAnswer = selectedAnswers[currentQuestionIndex]
-  const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100
-  const hasSelectedAnswer = selectedAnswer !== undefined
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Quiz Header */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">{quiz.categoryName}</h1>
-              <p className="text-lg text-gray-600">
-                Question {currentQuestionIndex + 1} of {quiz.questions.length}
-              </p>
+    <div className='min-h-screen bg-gray-50'>
+      {/* Header */}
+      <header className='bg-white shadow-sm border-b'>
+        <div className='max-w-4xl mx-auto px-4 py-4'>
+          <div className='flex items-center justify-between'>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className='flex items-center space-x-2 text-gray-600 hover:text-gray-900'>
+              <ArrowLeft className='w-5 h-5' />
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Results Content */}
+      <div className='max-w-4xl mx-auto px-4 py-8'>
+        {/* Score Summary */}
+        <div className='bg-white rounded-lg shadow-lg p-8 mb-8'>
+          <div className='text-center mb-8'>
+            <h1 className='text-4xl font-bold text-gray-900 mb-4'>
+              Quiz Complete!
+            </h1>
+            <p className='text-lg text-gray-600'>
+              Great job completing the quiz
+            </p>
+          </div>
+
+          {/* Score Cards */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
+            <div className='text-center p-6 bg-blue-50 rounded-lg'>
+              <div className='flex items-center justify-center mb-4'>
+                <Trophy className='w-8 h-8 text-blue-600' />
+              </div>
+              <div className='text-3xl font-bold text-blue-600 mb-2'>
+                {percentage}%
+              </div>
+              <div className='text-sm text-gray-600'>Score</div>
             </div>
 
-            {/* Progress */}
-            <div className="mb-8">
-              <Progress value={progress} className="h-3" />
-              <div className="flex justify-between text-sm text-gray-500 mt-2">
-                <span>{Math.round(progress)}% Complete</span>
-                <span>{quiz.categoryName}</span>
+            <div className='text-center p-6 bg-green-50 rounded-lg'>
+              <div className='flex items-center justify-center mb-4'>
+                <Target className='w-8 h-8 text-green-600' />
+              </div>
+              <div className='text-3xl font-bold text-green-600 mb-2'>
+                {calculatedScore}/{totalQuestions}
+              </div>
+              <div className='text-sm text-gray-600'>
+                Correct Answers
+              </div>
+            </div>
+
+            <div className='text-center p-6 bg-purple-50 rounded-lg'>
+              <div className='flex items-center justify-center mb-4'>
+                <Clock className='w-8 h-8 text-purple-600' />
+              </div>
+              <div className='text-3xl font-bold text-purple-600 mb-2'>
+                {Math.floor(timeTaken / 60)}:
+                {String(timeTaken % 60).padStart(2, "0")}
+              </div>
+              <div className='text-sm text-gray-600'>
+                Time Taken
               </div>
             </div>
           </div>
 
-          {/* Question Card */}
-          <div className="max-w-4xl mx-auto">
-            <Card className="shadow-lg">
-              <CardHeader className="bg-white">
-                <div className="text-2xl leading-relaxed text-gray-900">
-                  <CodeRenderer content={currentQuestion.question} />
-                </div>
-              </CardHeader>
-              
-              <CardContent className="bg-white p-8 space-y-6">
-                {/* Options */}
-                {currentQuestion.options.map((option, index) => (
-                  <div
-                    key={index}
-                    onClick={() => selectAnswer(index)}
-                    className={`p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                      showExplanation
-                        ? index === currentQuestion.correctAnswer
-                          ? 'border-green-500 bg-green-50'
-                          : index === selectedAnswer
-                          ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                        : selectedAnswer === index
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-25'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-lg font-medium ${
-                        showExplanation
-                          ? index === currentQuestion.correctAnswer
-                            ? 'border-green-500 bg-green-500 text-white'
-                            : index === selectedAnswer
-                            ? 'border-red-500 bg-red-500 text-white'
-                            : 'border-gray-300 text-gray-500'
-                          : selectedAnswer === index
-                            ? 'border-indigo-500 bg-indigo-500 text-white'
-                            : 'border-gray-300 text-gray-500'
-                      }`}>
-                        {String.fromCharCode(65 + index)}
-                      </div>
-                      
-                      <div className="flex-1 text-lg">
-                        <CodeRenderer content={option} />
-                      </div>
-                      
-                      {showExplanation && (
-                        <div className="ml-auto">
-                          {index === currentQuestion.correctAnswer && (
-                            <CheckCircle className="h-6 w-6 text-green-500" />
-                          )}
-                          {index === selectedAnswer && index !== currentQuestion.correctAnswer && (
-                            <XCircle className="h-6 w-6 text-red-500" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Explanation */}
-                {showExplanation && (
-                  <div className={`mt-8 p-6 rounded-lg border-2 ${
-                    selectedAnswer === currentQuestion.correctAnswer
-                      ? 'border-green-200 bg-green-50'
-                      : 'border-red-200 bg-red-50'
+          {/* Action Buttons */}
+          <div className='flex flex-col sm:flex-row gap-4'>
+            <button
+              onClick={() => router.push(`/quiz/${id}`)}
+              className='flex-1 bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors'>
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className='flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors'>
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+
+        {/* Detailed Results */}
+        <div className='bg-white rounded-lg shadow-lg p-8'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-6'>
+            Question Review
+          </h2>
+
+          <div className='space-y-6'>
+            {questions.map((question, index) => {
+              const userAnswer = answers[index]
+              const isCorrect = userAnswer === question.correctAnswer
+
+              return (
+                <div
+                  key={question.id}
+                  className={`border-2 rounded-lg p-6 ${
+                    isCorrect
+                      ? "border-green-200 bg-green-50"
+                      : "border-red-200 bg-red-50"
                   }`}>
-                    <div className="flex items-center space-x-3 mb-4">
-                      {selectedAnswer === currentQuestion.correctAnswer ? (
-                        <CheckCircle className="h-6 w-6 text-green-600" />
-                      ) : (
-                        <XCircle className="h-6 w-6 text-red-600" />
-                      )}
-                      <span className={`font-semibold text-lg ${
-                        selectedAnswer === currentQuestion.correctAnswer ? 'text-green-900' : 'text-red-900'
+                  <div className='flex items-start justify-between mb-4'>
+                    <h3 className='text-lg font-semibold text-gray-900'>
+                      Question {index + 1}
+                    </h3>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        isCorrect
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                       }`}>
-                        {selectedAnswer === currentQuestion.correctAnswer ? 'Correct!' : 'Incorrect'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-gray-700 text-lg">
-                      <CodeRenderer content={currentQuestion.explanation} />
-                    </div>
+                      {isCorrect ? "Correct" : "Incorrect"}
+                    </span>
                   </div>
-                )}
-                
-                {/* Action Button */}
-                <div className="flex justify-end pt-6">
-                  {!showExplanation ? (
-                    <Button
-                      onClick={nextQuestion}
-                      disabled={!hasSelectedAnswer}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg"
-                      size="lg"
-                    >
-                      {hasSelectedAnswer ? 'Submit Answer' : 'Select an answer'}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={nextQuestion}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg"
-                      size="lg"
-                    >
-                      {currentQuestionIndex < quiz.questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-                    </Button>
-                  )}
+
+                  <div className='mb-4'>
+                    <MarkdownRenderer
+                      content={question.question}
+                      className='text-gray-900'
+                    />
+                  </div>
+
+                  <div className='space-y-2 mb-4'>
+                    {question.options.map((option, optionIndex) => (
+                      <div
+                        key={optionIndex}
+                        className={`p-3 rounded-lg border-2 ${
+                          optionIndex === question.correctAnswer
+                            ? "border-green-500 bg-green-100"
+                            : optionIndex === userAnswer && !isCorrect
+                            ? "border-red-500 bg-red-100"
+                            : "border-gray-200 bg-white"
+                        }`}>
+                        <div className='flex items-start'>
+                          <span className='font-semibold mr-2 mt-1 flex-shrink-0'>
+                            {String.fromCharCode(65 + optionIndex)}.
+                          </span>
+                          <div className='flex-1'>
+                            <MarkdownRenderer
+                              content={option}
+                              className='text-left'
+                            />
+                          </div>
+                        </div>
+                        {optionIndex === question.correctAnswer && (
+                          <span className='ml-2 text-green-700 font-semibold'>
+                            ✓ Correct Answer
+                          </span>
+                        )}
+                        {optionIndex === userAnswer && !isCorrect && (
+                          <span className='ml-2 text-red-700 font-semibold'>
+                            ✗ Your Answer
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className='bg-white rounded-lg p-4 border border-gray-200'>
+                    <h4 className='font-semibold text-gray-900 mb-2'>
+                      Explanation:
+                    </h4>
+                    <MarkdownRenderer
+                      content={question.explanation}
+                      className='text-gray-700'
+                    />
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              )
+            })}
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   )
 }
 
-export default function QuizPage() {
-  return <ProtectedRoute><QuizContent /></ProtectedRoute>
+export default function Results() {
+  return (
+    <ProtectedRoute>
+      <ResultsContent />
+    </ProtectedRoute>
+  )
 }
