@@ -118,7 +118,7 @@ function ResultsContent() {
         }
     
         submitResults()
-    }, [user?.id, id, answers, timeTaken])
+    }, [user?.id, id, answers, timeTaken, router])
 
     if (isLoading) {
         return (

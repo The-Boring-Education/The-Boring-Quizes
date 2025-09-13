@@ -53,7 +53,7 @@ export interface APIResponse<T> {
     data: T
 }
 
-// Specific response types  
+// Specific response types
 export interface QuizCategoriesResponse {
     data: QuizCategoryAPI[]
 }
@@ -81,9 +81,15 @@ export interface QuizQuestionsData {
 export interface PerformanceMetrics {
     totalAttempts: number
     totalQuizzes: number
+    totalScore?: number // Optional field for total score/points earned
     averageScore: number
     bestScore: number
     totalTimeSpent: number
+    averageTimePerQuiz?: number // Optional field for average time per quiz
+    accuracyRate?: number // Optional field for accuracy rate percentage
+    improvementRate?: number // Optional field for improvement rate percentage
+    streakDays?: number // Optional field for consecutive active days
+    lastActiveDate?: string // Optional field for last activity date
     categoryBreakdown: Array<{
         categoryName: string
         attempts: number
@@ -108,7 +114,7 @@ export interface CategoryPerformance {
     averageScore: number
     totalTimeSpent: number
     lastAttemptDate: string
-    improvementTrend: 'improving' | 'declining' | 'stable'
+    improvementTrend: "improving" | "declining" | "stable"
 }
 
 export interface PerformanceHistory {

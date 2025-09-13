@@ -296,7 +296,7 @@ function LeaderboardContent() {
 
     useEffect(() => {
         if (leaderboardError) handleError(leaderboardError)
-    }, [leaderboardError])
+    }, [leaderboardError, handleError])
 
     const handleViewProfile = async (userId: string) => {
         try {

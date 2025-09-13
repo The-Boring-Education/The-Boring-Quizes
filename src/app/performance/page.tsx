@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,13 +27,7 @@ const PerformanceContent = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user?.id) {
-      loadPerformance()
-    }
-  }, [user?.id])
-
-  const loadPerformance = async () => {
+  const loadPerformance = useCallback(async () => {
     if (!user?.id) return
 
     try {
@@ -52,7 +46,13 @@ const PerformanceContent = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (user?.id) {
+      loadPerformance()
+    }
+  }, [user?.id, loadPerformance])
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
