@@ -53,7 +53,7 @@ export interface APIResponse<T> {
     data: T
 }
 
-// Specific response types  
+// Specific response types
 export interface QuizCategoriesResponse {
     data: QuizCategoryAPI[]
 }
@@ -80,15 +80,30 @@ export interface QuizQuestionsData {
 // Enhanced Analytics Types
 export interface PerformanceMetrics {
     totalAttempts: number
-    totalScore: number
+    totalQuizzes: number
+    totalScore?: number // Optional field for total score/points earned
     averageScore: number
     bestScore: number
     totalTimeSpent: number
-    averageTimePerQuiz: number
-    accuracyRate: number
-    improvementRate: number
-    streakDays: number
-    lastActiveDate: string
+    averageTimePerQuiz?: number // Optional field for average time per quiz
+    accuracyRate?: number // Optional field for accuracy rate percentage
+    improvementRate?: number // Optional field for improvement rate percentage
+    streakDays?: number // Optional field for consecutive active days
+    lastActiveDate?: string // Optional field for last activity date
+    categoryBreakdown: Array<{
+        categoryName: string
+        attempts: number
+        averageScore: number
+        bestScore: number
+    }>
+    recentAttempts: Array<{
+        _id: string
+        quizId: string
+        categoryName: string
+        score: number
+        completedAt: string
+        totalTimeSpent: number
+    }>
 }
 
 export interface CategoryPerformance {
@@ -99,7 +114,7 @@ export interface CategoryPerformance {
     averageScore: number
     totalTimeSpent: number
     lastAttemptDate: string
-    improvementTrend: 'improving' | 'declining' | 'stable'
+    improvementTrend: "improving" | "declining" | "stable"
 }
 
 export interface PerformanceHistory {
@@ -111,15 +126,13 @@ export interface PerformanceHistory {
 }
 
 export interface LeaderboardData {
-    rank: number
-    userId: string
-    userName: string
-    userImage?: string
-    totalPoints: number
-    totalQuizzes: number
+    _id: string
+    username: string
+    image: string
+    bestScore: number
+    totalAttempts: number
     averageScore: number
-    streakDays: number
-    achievements: string[]
+    totalTimeSpent: number
 }
 
 export interface Achievement {

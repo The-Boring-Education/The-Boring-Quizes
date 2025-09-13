@@ -1,6 +1,6 @@
 {
   "name": "the-boring-quizes",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
@@ -26,12 +26,15 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@react-oauth/google": "^0.12.2",
     "@tanstack/react-query": "^5.83.0",
+    "@types/markdown-it": "^14.1.2",
     "@types/react-syntax-highlighter": "^15.5.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "highlight.js": "^11.11.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.462.0",
+    "markdown-it": "^14.1.0",
     "next": "13.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -179,7 +179,7 @@ function StatsContent() {
     useEffect(() => {
         if (metricsError) handleError(metricsError)
         if (categoryError) handleError(categoryError)
-    }, [metricsError, categoryError])
+    }, [metricsError, categoryError, handleError])
 
     const metrics = metricsData || {
         totalAttempts: 0,
@@ -240,7 +240,7 @@ function StatsContent() {
                         value={metricsLoading ? <MetricLoader /> : `${metrics.averageScore}%`}
                         subtitle="Overall performance"
                         icon={<BarChart3 className="w-6 h-6 text-green-500" />}
-                        trend={{ value: metrics.improvementRate, isPositive: metrics.improvementRate > 0 }}
+                        trend={{ value: metrics.improvementRate ?? 0, isPositive: (metrics.improvementRate ?? 0) > 0 }}
                         className="animate-slide-in-left"
                         style={{ animationDelay: '0.1s' }}
                     />
@@ -256,7 +256,7 @@ function StatsContent() {
                     
                     <MetricCard
                         title="Streak Days"
-                        value={metricsLoading ? <MetricLoader /> : metrics.streakDays}
+                        value={metricsLoading ? <MetricLoader /> : metrics.streakDays ?? 0}
                         subtitle="Consecutive active days"
                         icon={<Zap className="w-6 h-6 text-purple-500" />}
                         className="animate-slide-in-left"
@@ -287,14 +287,14 @@ function StatsContent() {
                                 </div>
                                 <div className="text-center p-4 bg-muted/30 rounded-lg">
                                     <p className="text-2xl font-bold text-foreground">
-                                        {metricsLoading ? '...' : formatDuration(metrics.averageTimePerQuiz)}
+                                        {metricsLoading ? '...' : formatDuration(metrics.averageTimePerQuiz ?? 0)}
                                     </p>
                                     <p className="text-sm text-muted-foreground">Avg per Quiz</p>
                                 </div>
                             </div>
                             <div className="text-center p-4 bg-muted/30 rounded-lg">
                                 <p className="text-3xl font-bold text-foreground">
-                                    {metricsLoading ? '...' : `${metrics.accuracyRate}%`}
+                                    {metricsLoading ? '...' : `${metrics.accuracyRate ?? 0}%`}
                                 </p>
                                 <p className="text-sm text-muted-foreground">Overall Accuracy</p>
                             </div>
@@ -316,11 +316,11 @@ function StatsContent() {
                             <div className="space-y-3">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <span className="text-sm">Last active: {formatTimeAgo(metrics.lastActiveDate)}</span>
+                                    <span className="text-sm">Last active: {formatTimeAgo(metrics.lastActiveDate ?? new Date().toISOString())}</span>
                                 </div>
                                 <div className="flex items-center space-x-3">
                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <span className="text-sm">Total points earned: {metrics.totalScore}</span>
+                                    <span className="text-sm">Total points earned: {metrics.totalScore ?? 0}</span>
                                 </div>
                                 <div className="flex items-center space-x-3">
                                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
