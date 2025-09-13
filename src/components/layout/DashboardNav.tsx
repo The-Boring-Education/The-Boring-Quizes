@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
+import { PointsDisplay } from '@/components/PointsDisplay'
 
 
 
@@ -19,7 +20,6 @@ export function DashboardNav() {
     const router = useRouter()
     const { toast } = useToast()
     const [showUserMenu, setShowUserMenu] = useState(false)
-
     const [loading, setLoading] = useState(false)
 
     const handleSignOut = async () => {
@@ -58,12 +58,18 @@ export function DashboardNav() {
                         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
                             <Brain className="w-5 h-5 text-primary-foreground" />
                         </div>
-                        <h1 className="text-2xl font-bold text-foreground">
-                            The Boring Quizes
-                        </h1>
+                        <div>
+                            <h1 className="text-2xl font-bold text-foreground">
+                                The Boring Quizes
+                            </h1>
+                            <p className="text-xs text-black">
+                                By The Boring Education
+                            </p>
+                        </div>
                     </div>
 
-
+                    {/* Points Display */}
+                    <PointsDisplay userId={user?.id} variant="dashboard" />
 
                     {/* User Menu */}
                     <div className="flex items-center space-x-4">

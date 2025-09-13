@@ -283,7 +283,7 @@ function HistoryContent() {
     useEffect(() => {
         if (attemptsError) handleError(attemptsError)
         if (historyError) handleError(historyError)
-    }, [attemptsError, historyError])
+    }, [attemptsError, historyError, handleError])
 
     const attempts = attemptsData || []
     const history = historyData || []

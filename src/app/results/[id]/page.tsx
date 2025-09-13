@@ -21,6 +21,7 @@ interface QuizQuestion {
     difficulty?: string
 }
 
+
 function ResultsContent() {
     const params = useParams()
     const router = useRouter()
@@ -43,7 +44,9 @@ function ResultsContent() {
     } = useQuery({
         queryKey: ["quiz", id],
         queryFn: () => quizApi.getQuestions(id!),
-        enabled: !!id
+        enabled: !!id,
+        staleTime: 0, // Always fetch fresh data
+        gcTime: 0  // Don't cache the data
     })
 
     const questions: Question[] =
@@ -115,7 +118,7 @@ function ResultsContent() {
         }
     
         submitResults()
-    }, [user?.id, id, answers, timeTaken])
+    }, [user?.id, id, answers, timeTaken, router])
 
     if (isLoading) {
         return (

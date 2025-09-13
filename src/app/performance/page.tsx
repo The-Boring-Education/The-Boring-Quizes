@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Layout } from "@/components/Layout"
 import { useAuth } from "@/contexts/AuthContext"
 import { analyticsApi, APIError } from "@/services/api"
+import { PerformanceMetrics } from "@/types/api"
 import { 
   BarChart3, 
   Trophy, 
@@ -17,33 +18,16 @@ import {
 } from "lucide-react"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 
-interface UserPerformance {
-  totalAttempts: number
-  totalScore: number
-  averageScore: number
-  bestScore: number
-  totalTimeSpent: number
-  averageTimePerQuiz: number
-  accuracyRate: number
-  improvementRate: number
-  streakDays: number
-  lastActiveDate: string
-}
+// Use the PerformanceMetrics type from the API
 
 const PerformanceContent = () => {
   const { user } = useAuth()
   const router = useRouter()
-  const [performance, setPerformance] = useState<UserPerformance | null>(null)
+  const [performance, setPerformance] = useState<PerformanceMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user?.id) {
-      loadPerformance()
-    }
-  }, [user?.id])
-
-  const loadPerformance = async () => {
+  const loadPerformance = useCallback(async () => {
     if (!user?.id) return
 
     try {
@@ -62,15 +46,26 @@ const PerformanceContent = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (user?.id) {
+      loadPerformance()
+    }
+  }, [user?.id, loadPerformance])
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
+    const remainingSeconds = seconds % 60
+    
     if (hours > 0) {
       return `${hours}h ${minutes}m`
+    } else if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`
+    } else {
+      return `${remainingSeconds}s`
     }
-    return `${minutes}m`
   }
 
 
@@ -179,7 +174,7 @@ const PerformanceContent = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Accuracy Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">{performance.accuracyRate}%</p>
+                    <p className="text-2xl font-bold text-gray-900">{performance.averageScore}%</p>
                   </div>
                 </div>
               </CardContent>
